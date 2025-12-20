@@ -6,6 +6,7 @@ import authRouter from "./routes/auth.routes.js";
 import jobRouter from "./routes/job.route.js";
 import applicationRouter from "./routes/application.route.js";
 import companyRouter from "./routes/company.routes.js";
+import connectToDatabase from "./database/mongodb.js";
 
 const app = express();
 
@@ -18,6 +19,7 @@ app.get("/", (req, res) => {
   res.send("Welcome to job portal Backend!");
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server is running on port ${PORT}`);
+  await connectToDatabase();
 });
