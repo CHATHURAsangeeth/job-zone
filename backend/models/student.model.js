@@ -9,9 +9,10 @@ const studentSchema = new mongoose.Schema(
     skills: [String],
     profile_image: { type: String }, // URL
     resume_url: { type: String }, // URL
-    role: { type: String, default: "student" },
+    role: { type: String, default: "student", required: true },
   },
   { timestamps: true }
 );
 
-export default mongoose.model("Student", studentSchema);
+const Student = mongoose.model("Student", studentSchema);
+export default Student;
