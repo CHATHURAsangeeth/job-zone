@@ -9,6 +9,7 @@ import companyRouter from "./routes/company.routes.js";
 import connectToDatabase from "./database/mongodb.js";
 import errorMiddleware from "./middleware.js/error.middleware.js";
 import cookieParser from "cookie-parser";
+import { authorize } from "./middleware.js/auth.middleware.js";
 
 const app = express();
 
@@ -17,7 +18,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
-app.use("/api/jobs", jobRouter);
+app.use("/api/jobs", authorize, jobRouter);
 app.use("/api/applications", applicationRouter);
 app.use("/api/companies", companyRouter);
 
