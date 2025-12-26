@@ -4,7 +4,7 @@ export default function Home() {
   return (
     // ✅ FULL-WIDTH SECTION (background & positioning)
     <section className="relative isolate w-full overflow-hidden h-full">
-        <section className="w-screen h-25 bg-gradient-to-r from-blue-300 via-purple-300 to-fuchsia-300 rounded-full"></section>
+        
 
       
       {/* 🔹 TOP BACKGROUND GRADIENT (FULL WIDTH) */}
@@ -26,7 +26,7 @@ export default function Home() {
 
       {/* ✅ CONTENT WRAPPER (THIS CENTERS EVERYTHING) */}
       {/* 🔥 THIS LINE FIXES YOUR ISSUE */}
-      <div className="relative px-6 lg:px-8">
+      <div className="relative px-6 mt-8 lg:px-8">
         {/* 🔥 CENTERED MAX WIDTH CONTAINER */}
         <div className="mx-auto max-w-4xl py-32 sm:py-38 lg:py-46">
           

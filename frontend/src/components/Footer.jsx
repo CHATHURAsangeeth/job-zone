@@ -10,7 +10,7 @@ export const Footer = () => {
   return (
     <footer className="bg-gradient-to-r from-blue-100 via-purple-100 to-pink-100">
       {/* Main footer content */}
-      <div className="mx-auto max-w-7xl px-6 py-12">
+      <div className="mx-auto max-w-7xl px-6 py-8 justify-center md:justify-between md:flex md:px-8">
         <div className="grid gap-10 md:grid-cols-3">
 
           {/* Brand / About */}
@@ -70,12 +70,8 @@ export const Footer = () => {
         </div>
       </div>
 
-      {/* Bottom bar */}
-      <div className="border-t border-gray-200">
-        <div className="mx-auto max-w-7xl px-6 py-4 text-center text-sm text-gray-500">
-          © {new Date().getFullYear()} Job Zone. All rights reserved.
-        </div>
-      </div>
+      
+      
     </footer>
   )
 }
