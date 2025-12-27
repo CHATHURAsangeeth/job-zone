@@ -1,9 +1,8 @@
-
-
 import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-
+import { isUserLoggedIn } from "../services/auth.service";
+import { Link } from "react-router-dom";
 
 const navigation = [
   { name: "Service", href: "#" },
@@ -14,6 +13,7 @@ const navigation = [
 
 export const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const isLogginUser = isUserLoggedIn();
 
   return (
     <div>
@@ -54,18 +54,25 @@ export const NavBar = () => {
               </a>
             ))}
           </div>
-          <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-1">
-            <button className="border-2px rounded-md px-3 py-1">
-              <a href="#" className="text-xl font-semibold text-gray-900">
-                Log in
-              </a>
-            </button>
-            <button className="border-2px rounded-md px-3 py-1 bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500 text-white">
-              <a href="#" className="text-xl text-white font-semibold hover:text-black">
+          {!isLogginUser ? (
+            <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-1">
+              <Link
+                to="/login"
+                className="border rounded-md px-3 py-1 text-xl font-semibold text-gray-900 hover:bg-gray-100"
+              >
+                Log In
+              </Link>
+
+              <Link
+                to="/register"
+                className="border rounded-md px-3 py-1 bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500 text-white text-xl font-semibold hover:text-black"
+              >
                 Sign Up
-              </a>
-            </button>
-          </div>
+              </Link>
+            </div>
+          ) : (
+            " "
+          )}
         </nav>
         <Dialog
           open={mobileMenuOpen}
@@ -105,26 +112,32 @@ export const NavBar = () => {
                     </a>
                   ))}
                 </div>
-                <div className="py-6">
-                  <a
-                    href="#"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                  >
-                    Log in
-                  </a>
-                  <a
-                    href="#"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                  >
-                    Sign Up
-                  </a>
-                </div>
+                {!isLogginUser ? (
+                  <div className="py-6">
+                    <Link
+                      to="/login"
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                    >
+                      Log In
+                    </Link>
+
+                    <Link
+                      to="/register" // changed from <a> to <Link>
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                    >
+                      Sign Up
+                    </Link>
+                  </div>
+                ) : (
+                  " "
+                )}
               </div>
             </div>
           </DialogPanel>
         </Dialog>
       </header>
-      </div>
-  )}
+    </div>
+  );
+};
 
-  export default NavBar;
+export default NavBar;

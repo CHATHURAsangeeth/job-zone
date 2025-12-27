@@ -13,7 +13,7 @@ export default function App() {
   return (
     <div className="w-full min-h-screen flex flex-col">
       <NavBar />
-      <section className="bg-white w-screen flex-1">
+      <section className="w-screen flex-1">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />

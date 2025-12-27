@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 
 export default function Login() {
@@ -7,6 +6,7 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [role, setRole] = useState("student");
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -24,16 +24,15 @@ export default function Login() {
       await new Promise((res) => setTimeout(res, 1000));
       alert(`Signed in as ${email}`);
     } catch (err) {
-      setError("Something went wrong. Please try again.error-",err);
+      setError("Something went wrong. Please try again.error-", err);
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    
     <div className="min-h-screen flex items-center justify-center px-4 ">
-       {/* 🔹 TOP BACKGROUND GRADIENT (FULL WIDTH) */}
+      {/* 🔹 TOP BACKGROUND GRADIENT (FULL WIDTH) */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 -top-40 -z-10 transform-gpu overflow-hidden blur-3xl sm:-top-80"
@@ -63,6 +62,62 @@ export default function Login() {
 
           {/* Form */}
           <form onSubmit={onSubmit} className="mt-8 space-y-5">
+            {/* Role Selection */}
+            <div>
+              <label
+                htmlFor="role"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Select Role
+              </label>
+              <select
+                id="role"
+                value={role}
+                onChange={(e) => setRole(e.target.value)}
+                className="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-gray-900 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+              >
+                <option value="student">Student</option>
+                <option value="company">Company</option>
+              </select>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700"
+              >
+                Email Address
+              </label>
+              <div className="mt-2 relative">
+                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
+                  {/* Mail icon */}
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    className="h-5 w-5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M3 7.5l8.485 6.364a2 2 0 002.53 0L22.5 7.5M4.5 6A2.5 2.5 0 002 8.5v7A2.5 2.5 0 004.5 18h15a2.5 2.5 0 002.5-2.5v-7A2.5 2.5 0 0019.5 6h-15z"
+                    />
+                  </svg>
+                </span>
+                <input
+                  id="email"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="company4@timetoprogram.com"
+                  className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                />
+              </div>
+            </div>
+
             {/* Email */}
             <div>
               <label
@@ -194,8 +249,7 @@ export default function Login() {
               disabled={loading}
               className="w-full rounded-lg py-2.5 font-semibold text-white transition focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60"
               style={{
-                background:
-                  "linear-gradient(90deg, #3B82F6 0%, #8B5CF6 100%)", // blue → purple gradient like the screenshot
+                background: "linear-gradient(90deg, #3B82F6 0%, #8B5CF6 100%)", // blue → purple gradient like the screenshot
                 boxShadow: "0 6px 14px rgba(99,102,241,0.35)",
               }}
             >
@@ -215,7 +269,7 @@ export default function Login() {
           </form>
         </div>
       </div>
-       {/* 🔹 BOTTOM BACKGROUND GRADIENT (FULL WIDTH) */}
+      {/* 🔹 BOTTOM BACKGROUND GRADIENT (FULL WIDTH) */}
       <div
         aria-hidden="true"
         className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10
@@ -233,6 +287,5 @@ export default function Login() {
         />
       </div>
     </div>
-    
   );
 }

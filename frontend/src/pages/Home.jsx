@@ -4,9 +4,6 @@ export default function Home() {
   return (
     // ✅ FULL-WIDTH SECTION (background & positioning)
     <section className="relative isolate w-full overflow-hidden h-full">
-        
-
-      
       {/* 🔹 TOP BACKGROUND GRADIENT (FULL WIDTH) */}
       <div
         aria-hidden="true"
@@ -29,21 +26,22 @@ export default function Home() {
       <div className="relative px-6 mt-8 lg:px-8">
         {/* 🔥 CENTERED MAX WIDTH CONTAINER */}
         <div className="mx-auto max-w-4xl py-32 sm:py-38 lg:py-46">
-          
           <div className="text-center">
             <h1 className="text-balance text-5xl font-semibold tracking-tight text-gray-900 sm:text-7xl">
               Find Your Dream Job or
             </h1>
 
-            <span className="block text-balance text-5xl font-semibold tracking-tight sm:text-7xl
+            <span
+              className="block text-balance text-5xl font-semibold tracking-tight sm:text-7xl
                              bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500
-                             bg-clip-text text-transparent">
+                             bg-clip-text text-transparent"
+            >
               Perfect Hire
             </span>
 
             <p className="mt-8 text-pretty text-lg font-medium text-gray-500 sm:text-xl">
-              Connect Talented Professionals with innovative companies.
-              Your next career move or perfect candidate is just one click away.
+              Connect Talented Professionals with innovative companies. Your
+              next career move or perfect candidate is just one click away.
             </p>
 
             <div className="mt-10 flex items-center justify-center gap-x-6">
@@ -90,4 +88,3 @@ export default function Home() {
     </section>
   );
 }
-
