@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Dialog, DialogPanel } from "@headlessui/react";
+import { Button, Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { isUserLoggedIn } from "../services/auth.service";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 const navigation = [
   { name: "Service", href: "#" },
@@ -13,7 +13,9 @@ const navigation = [
 
 export const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const isLogginUser = isUserLoggedIn();
+  let isLogginUser = isUserLoggedIn();
+  console.log("is user logged in", isLogginUser);
+  const navigate = useNavigate();
 
   return (
     <div>
@@ -22,18 +24,17 @@ export const NavBar = () => {
           aria-label="Global"
           className="flex items-center justify-between p-6 lg:px-8"
         >
-          <div className="flex lg:flex-1 gap-1">
-            <a href="#" className="-m-1.5 p-1.5">
-              <img
-                alt=""
-                src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
-                className="h-8 w-auto"
-              />
-            </a>
+          <Link to="/" className="flex lg:flex-1 gap-1">
+            <img
+              alt=""
+              src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=600"
+              className="h-8 w-auto "
+            />
+
             <span className="text-black font-semibold text-center text-2xl">
               Job Zone
             </span>
-          </div>
+          </Link>
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -71,7 +72,17 @@ export const NavBar = () => {
               </Link>
             </div>
           ) : (
-            " "
+            <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-1">
+              <Button
+                onClick={() => {
+                  localStorage.clear();
+                  navigate("/");
+                }}
+                className="border rounded-md px-3 py-1 text-xl font-semibold text-gray-900 hover:bg-gray-100"
+              >
+                Log Out
+              </Button>
+            </div>
           )}
         </nav>
         <Dialog

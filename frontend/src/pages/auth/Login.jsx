@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { loginUser } from "../../services/api.service";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -20,11 +22,20 @@ export default function Login() {
 
     try {
       setLoading(true);
-      // Simulate sign-in API call
-      await new Promise((res) => setTimeout(res, 1000));
-      alert(`Signed in as ${email}`);
+      const data = await loginUser({ role, email, password });
+      if (!data?.data?.token) {
+        toast.error(`Login failed: ${data?.data?.message}`, {
+          className: "bg-red-600 text-white",
+        });
+        return;
+      }
+      localStorage.setItem("token", data?.data?.token);
+      localStorage.setItem("user", data?.data?.user);
+      toast.success(`Signed in as ${data?.data?.user.name} `);
     } catch (err) {
-      setError("Something went wrong. Please try again.error-", err);
+      toast.error(`Login failed: ${err.message}`, {
+        className: "bg-red-600 text-white",
+      });
     } finally {
       setLoading(false);
     }
@@ -79,43 +90,6 @@ export default function Login() {
                 <option value="student">Student</option>
                 <option value="company">Company</option>
               </select>
-            </div>
-
-            {/* Email */}
-            <div>
-              <label
-                htmlFor="email"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Email Address
-              </label>
-              <div className="mt-2 relative">
-                <span className="absolute inset-y-0 left-3 flex items-center text-gray-400">
-                  {/* Mail icon */}
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    className="h-5 w-5"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="1.5"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M3 7.5l8.485 6.364a2 2 0 002.53 0L22.5 7.5M4.5 6A2.5 2.5 0 002 8.5v7A2.5 2.5 0 004.5 18h15a2.5 2.5 0 002.5-2.5v-7A2.5 2.5 0 0019.5 6h-15z"
-                    />
-                  </svg>
-                </span>
-                <input
-                  id="email"
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="company4@timetoprogram.com"
-                  className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 py-2.5 text-gray-900 placeholder-gray-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                />
-              </div>
             </div>
 
             {/* Email */}

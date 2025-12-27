@@ -1,4 +1,6 @@
 import { useState } from "react";
+import { registerUser } from "../../services/api.service";
+import { toast } from "react-toastify";
 
 export default function RegisterCard() {
   const [role, setRole] = useState("student"); // top toggle
@@ -6,6 +8,7 @@ export default function RegisterCard() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [university, setUniversity] = useState("");
+  const [resume_url, setResume_url] = useState("");
   const [skills, setSkills] = useState("");
   const [contactNumber, setContactNumber] = useState("");
   const [error, setError] = useState("");
@@ -25,18 +28,45 @@ export default function RegisterCard() {
       setLoading(true);
       // Here you would call your API to create either a Student or Company
       await new Promise((res) => setTimeout(res, 1200));
+      let data;
 
       if (role === "student") {
-        alert(
-          `Student account created for ${fullName}.\nUniversity: ${university}\nSkills: ${skills}`
-        );
-      } else {
-        alert(
-          `Company account created for ${fullName}.\nContact: ${contactNumber}`
-        );
+        data = await registerUser({
+          role,
+          fullName,
+          email,
+          password,
+          university,
+          skills,
+          resume_url,
+        });
+        if (!data?.data?.token) {
+          setError(data?.data?.message);
+          return;
+        }
+        localStorage.setItem("token", data?.data?.token);
+        localStorage.setItem("user", data?.data?.user);
+        toast.success(`Student account created for ${fullName}.`);
+      } else if (role === "company") {
+        data = await registerUser({
+          role,
+          fullName,
+          email,
+          password,
+          contactNumber,
+        });
+        if (!data?.data?.token) {
+          setError(data?.data?.message);
+          return;
+        }
+        localStorage.setItem("token", data?.data?.token);
+        localStorage.setItem("user", data?.data?.user);
+        toast.success(`Company account created for ${fullName}.`);
       }
     } catch {
-      setError("Something went wrong. Please try again.");
+      toast.error(`Registration failed.`, {
+        className: "bg-red-600 text-white",
+      });
     } finally {
       setLoading(false);
     }
@@ -149,6 +179,20 @@ export default function RegisterCard() {
                     value={skills}
                     onChange={(e) => setSkills(e.target.value)}
                     placeholder="e.g., JavaScript, Python"
+                    className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  />
+                </div>
+
+                {/* CB */}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700">
+                    Resume Url
+                  </label>
+                  <input
+                    type="text"
+                    value={resume_url}
+                    onChange={(e) => setResume_url(e.target.value)}
+                    placeholder="Enter your Resume Url"
                     className="w-full rounded-lg border border-gray-300 px-3 py-2 text-gray-900 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                   />
                 </div>

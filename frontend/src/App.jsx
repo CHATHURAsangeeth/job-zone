@@ -8,6 +8,8 @@ import Application from "./pages/company/Applicants.jsx";
 import CompanyDashboard from "./pages/company/CompanyDashboard.jsx";
 import PostJob from "./pages/company/PostJob.jsx";
 import "./index.css";
+import "react-toastify/dist/ReactToastify.css";
+import { ToastContainer } from "react-toastify";
 
 export default function App() {
   return (
@@ -27,6 +29,18 @@ export default function App() {
       <section className="mt-auto mb-0">
         <Footer />
       </section>
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        
+      />
     </div>
   );
 }
