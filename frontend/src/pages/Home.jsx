@@ -65,7 +65,7 @@ export default function Home() {
               <Button
                 onClick={() => {
                   {
-                    isLogginUser ? navigate("") : navigate("/login");
+                    isLogginUser ? navigate("/companyDashboard") : navigate("/login");
                   }
                 }}
                 className="text-xl font-semibold text-gray-900

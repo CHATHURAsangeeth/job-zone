@@ -23,6 +23,7 @@ export default function Login() {
     try {
       setLoading(true);
       const data = await loginUser({ role, email, password });
+
       if (!data?.data?.token) {
         toast.error(`Login failed: ${data?.data?.message}`, {
           className: "bg-red-600 text-white",
@@ -30,7 +31,16 @@ export default function Login() {
         return;
       }
       localStorage.setItem("token", data?.data?.token);
-      localStorage.setItem("user", data?.data?.user);
+      localStorage.setItem(
+        "user",
+        JSON.stringify({
+          id: data?.data?.user._id,
+          email: data?.data?.user.email,
+          name: data?.data?.user.name,
+          role: data?.data?.user.role,
+        })
+      );
+
       toast.success(`Signed in as ${data?.data?.user.name} `);
     } catch (err) {
       toast.error(`Login failed: ${err.message}`, {

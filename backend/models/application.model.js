@@ -8,11 +8,18 @@ const applicationSchema = new mongoose.Schema(
       ref: "Student",
       required: true,
     },
+    company_id: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Company",
+      required: true,
+    },
     job_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Job",
       required: true,
     },
+    student_name: { type: String, required: true },
+    job_title: { type: String},
     status: {
       type: String,
       enum: ["Pending", "Accepted", "Rejected"],

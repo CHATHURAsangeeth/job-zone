@@ -45,7 +45,16 @@ export default function RegisterCard() {
           return;
         }
         localStorage.setItem("token", data?.data?.token);
-        localStorage.setItem("user", data?.data?.user);
+        localStorage.setItem(
+          "user",
+          JSON.stringify({
+            id: data?.data?.user._id,
+            email: data?.data?.user.email,
+            name: data?.data?.user.name,
+            role: data?.data?.user.role,
+          })
+        );
+
         toast.success(`Student account created for ${fullName}.`);
       } else if (role === "company") {
         data = await registerUser({

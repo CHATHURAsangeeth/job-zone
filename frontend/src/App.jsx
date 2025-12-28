@@ -22,7 +22,7 @@ export default function App() {
           <Route path="/register" element={<Register />} />
           <Route path="/applications" element={<Application />} />
           <Route path="/companyDashboard" element={<CompanyDashboard />} />
-          <Route path="/postjob" element={<PostJob />} />
+          <Route path="/companyDashboard/post-job" element={<PostJob />} />
         </Routes>
       </section>
 
@@ -39,7 +39,6 @@ export default function App() {
         pauseOnFocusLoss
         draggable
         pauseOnHover
-        
       />
     </div>
   );

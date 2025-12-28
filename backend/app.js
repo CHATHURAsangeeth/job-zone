@@ -26,8 +26,8 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/jobs", authorize, jobRouter);
-app.use("/api/applications", applicationRouter);
-app.use("/api/companies", companyRouter);
+app.use("/api/applications", authorize, applicationRouter);
+app.use("/api/companies", authorize, companyRouter);
 
 app.use(errorMiddleware);
 

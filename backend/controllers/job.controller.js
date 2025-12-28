@@ -33,7 +33,8 @@ export const getAllJobs = async (req, res, next) => {
 };
 
 export const postJob = async (req, res, next) => {
-  const session = await Job.startSession();
+  const session = await mongoose.startSession();
+
   try {
     const { title, description, location, pay, hours, deadline } = req.body;
 
@@ -90,7 +91,7 @@ export const postJob = async (req, res, next) => {
 };
 
 export const companyJobs = async (req, res, next) => {
-  const session = await Job.startSession();
+  const session = await mongoose.startSession();
 
   try {
     if (!req.user || !req.user.id) {
@@ -102,16 +103,13 @@ export const companyJobs = async (req, res, next) => {
 
     // pagiantion parameters
 
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
+    // const page = parseInt(req.query.page) || 1;
+    // const limit = parseInt(req.query.limit) || 10;
+    // const skip = (page - 1) * limit;
 
     const company_id = req.user.id;
     session.startTransaction();
-    const jobs = await Job.find({ company_id })
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+    const jobs = await Job.find({ company_id }).sort({ createdAt: -1 });
     await session.commitTransaction();
     await session.endSession();
     return res.status(200).json({
@@ -183,12 +181,21 @@ export const applyJob = async (req, res, next) => {
     }
     const { jobId } = req.params;
     const studentId = req.user.id;
+    const studentName = req.user.name;
 
     const job = await Job.findById(jobId);
     if (!job) {
       return res.status(404).json({
         success: false,
         message: "Job not found",
+      });
+    }
+    const company_id = job.company_id;
+    const job_title = job.title;
+    if (company_id === studentId) {
+      return res.status(400).json({
+        success: false,
+        message: "You cannot apply for your own job",
       });
     }
 
@@ -205,7 +212,10 @@ export const applyJob = async (req, res, next) => {
     session.startTransaction();
     const application = await Application.create({
       student_id: studentId,
+      company_id: company_id,
       job_id: jobId,
+      student_name: studentName,
+      job_title,
       status: "Pending",
     });
 

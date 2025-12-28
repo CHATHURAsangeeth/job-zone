@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Button, Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
-import { isUserLoggedIn } from "../services/auth.service";
+import { isUserLoggedIn, loggedUserData } from "../services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
 
 const navigation = [
@@ -16,6 +16,7 @@ export const NavBar = () => {
   let isLogginUser = isUserLoggedIn();
   console.log("is user logged in", isLogginUser);
   const navigate = useNavigate();
+  const { user } = isLogginUser ? loggedUserData() : { user: null };
 
   return (
     <div>
@@ -82,6 +83,12 @@ export const NavBar = () => {
               >
                 Log Out
               </Button>
+              <Link
+                to={user.role === "company" ? "/companyDashboard" : "/profile"}
+                className="border rounded-md px-3 py-1 bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500 text-white text-xl font-semibold hover:text-black"
+              >
+                Profile
+              </Link>
             </div>
           )}
         </nav>
@@ -140,7 +147,27 @@ export const NavBar = () => {
                     </Link>
                   </div>
                 ) : (
-                  " "
+                  <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-1">
+                    <Button
+                      onClick={() => {
+                        localStorage.clear();
+                        navigate("/");
+                      }}
+                      className="border rounded-md px-3 py-1 text-xl font-semibold text-gray-900 hover:bg-gray-100"
+                    >
+                      Log Out
+                    </Button>
+                    <Link
+                      to={
+                        user.role === "company"
+                          ? "/companyDashboard"
+                          : "/profile"
+                      }
+                      className="border rounded-md px-3 py-1 bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500 text-white text-xl font-semibold hover:text-black"
+                    >
+                      Profile
+                    </Link>
+                  </div>
                 )}
               </div>
             </div>

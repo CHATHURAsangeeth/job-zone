@@ -16,8 +16,7 @@ export const Footer = () => {
           <div>
             <h2 className="text-2xl font-bold text-gray-900">Job Zone</h2>
             <p className="mt-4 text-gray-600 text-sm leading-relaxed">
-              Connecting talented professionals with innovative companies. Find
-              your dream job or your next perfect hire with ease.
+            Connecting talented professionals with innovative companies. Find part-time jobs that let you spend your time pursuing your passion.
             </p>
           </div>
 
@@ -26,8 +25,8 @@ export const Footer = () => {
             <h3 className="text-lg font-semibold text-gray-900">Contact Us</h3>
             <ul className="mt-4 space-y-2 text-gray-600 text-sm">
               <li>Email: support@jobzone.com</li>
-              <li>Phone: +1 (555) 123-4567</li>
-              <li>Location: New York, USA</li>
+              <li>Phone: +94 123-4567</li>
+              <li>Location: Colombo, Sri Lanaka</li>
             </ul>
           </div>
 
