@@ -227,7 +227,7 @@ const ApplicationItem = ({ app }) => {
   );
 };
 
-const Application = () => {
+const Applicants = () => {
   // You can pass job details via props or route state; hardcoded here to match screenshot.
   const jobInfo = {
     title: "DevOps Engineer",
@@ -291,4 +291,4 @@ const Application = () => {
   );
 };
 
-export default Application;
+export default Applicants;

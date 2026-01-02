@@ -4,42 +4,35 @@ import Home from "./pages/Home.jsx";
 import { Route, Routes } from "react-router-dom";
 import Login from "./pages/auth/Login.jsx";
 import Register from "./pages/auth/Register.jsx";
-import Application from "./pages/company/Applicants.jsx";
+import Applicants  from "./pages/company/Applicants.jsx";
 import CompanyDashboard from "./pages/company/CompanyDashboard.jsx";
 import PostJob from "./pages/company/PostJob.jsx";
+import Jobs from "./pages/student/Jobs.jsx";
+import JobDetails from "./pages/student/JobDetails.jsx";
+import Profile from "./pages/student/Profile.jsx";
 import "./index.css";
-import "react-toastify/dist/ReactToastify.css";
-import { ToastContainer } from "react-toastify";
+
 
 export default function App() {
   return (
-    <div className="w-full min-h-screen flex flex-col">
-      <NavBar />
-      <section className="w-screen flex-1">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/applications" element={<Application />} />
-          <Route path="/companyDashboard" element={<CompanyDashboard />} />
-          <Route path="/companyDashboard/post-job" element={<PostJob />} />
-        </Routes>
-      </section>
+    <div className="w-full min-h-screen">
+     <NavBar />
+      <section className="bg-white w-screen"></section>
 
-      <section className="mt-auto mb-0">
-        <Footer />
-      </section>
-      <ToastContainer
-        position="top-right"
-        autoClose={3000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-      />
+      <Routes>
+        <Route path='/' element={<Home />} />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
+        <Route path='/applicants' element={<Applicants />}/>
+        <Route path='/companyDashboard' element={<CompanyDashboard />}/>
+        <Route path='/postJob' element={<PostJob />} />
+        <Route path='/jobs' element={<Jobs />} />
+        <Route path='/jobDetails' element={<JobDetails />} />
+        <Route path='/profile' element={<Profile />} />
+
+      </Routes>
+      
+   <Footer />
     </div>
   );
 }
