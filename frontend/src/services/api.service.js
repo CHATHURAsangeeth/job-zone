@@ -104,13 +104,16 @@ export async function fetchJobPostsByCompanyId() {
 export async function fetchApplicationsByCompanyId() {
   // eslint-disable-next-line no-useless-catch
   try {
-    const response = await fetch(`${VITE_API_BASE_URL}/api/applications/company`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/applications/company`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
 
     if (!response.ok) {
       throw new Error(response.statusText);
@@ -120,5 +123,43 @@ export async function fetchApplicationsByCompanyId() {
     return data;
   } catch (err) {
     throw err;
+  }
+}
+
+export async function postAJob(payload) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const requiredFields = ["title", "description"];
+    for (const field of requiredFields) {
+      if (!payload[field]?.trim()) {
+        throw new Error(`Job ${field} is required`);
+      }
+    }
+
+    const response = await fetch(`${VITE_API_BASE_URL}/api/jobs/company`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({
+        title: payload.title,
+        description: payload.description,
+        location: payload.location,
+        pay: payload.pay,
+        hours: payload.hours,
+        deadline: payload.deadline,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
   }
 }

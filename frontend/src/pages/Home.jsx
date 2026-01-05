@@ -1,11 +1,11 @@
 import { Button } from "@headlessui/react";
-import React from "react";
-import { isUserLoggedIn } from "../services/auth.service";
+import { isUserLoggedIn, loggedUserData } from "../services/auth.service";
 import { useNavigate } from "react-router-dom";
 
 export default function Home() {
   const isLogginUser = isUserLoggedIn();
   const navigate = useNavigate();
+  const { user } = isLogginUser ? loggedUserData() : { user: null };
   return (
     // ✅ FULL-WIDTH SECTION (background & positioning)
     <section className="relative isolate w-full overflow-hidden h-full">
@@ -49,32 +49,50 @@ export default function Home() {
               next career move or perfect candidate is just one click away.
             </p>
 
-            <div className="mt-10 flex items-center justify-center gap-x-6">
-              <Button
-                onClick={() => {
-                  isLogginUser ? navigate("/dashboard") : navigate("/login");
-                }}
-                className="rounded-md px-3.5 py-2.5 text-xl font-semibold
+            {user.role == "student" ? (
+              <div className="mt-10 flex items-center justify-center gap-x-6">
+                <Button
+                  onClick={() => {
+                    isLogginUser ? navigate("/dashboard") : navigate("/login");
+                  }}
+                  className="rounded-md px-3.5 py-2.5 text-xl font-semibold
                            bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500
                            text-white shadow-sm hover:text-black"
-              >
-                <span aria-hidden="true">🔍</span> Find Jobs{" "}
-                <span aria-hidden="true">→</span>
-              </Button>
+                >
+                  <span aria-hidden="true">🔍</span> Find Jobs{" "}
+                  <span aria-hidden="true">→</span>
+                </Button>
+              </div>
+            ) : (
+              <div className="mt-10 flex items-center justify-center gap-x-6">
+                <Button
+                  onClick={() => {
+                    isLogginUser ? navigate("/dashboard") : navigate("/login");
+                  }}
+                  className="rounded-md px-3.5 py-2.5 text-xl font-semibold
+                           bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500
+                           text-white shadow-sm hover:text-black"
+                >
+                  <span aria-hidden="true">🔍</span> Find Jobs{" "}
+                  <span aria-hidden="true">→</span>
+                </Button>
 
-              <Button
-                onClick={() => {
-                  {
-                    isLogginUser ? navigate("/companyDashboard") : navigate("/login");
-                  }
-                }}
-                className="text-xl font-semibold text-gray-900
+                <Button
+                  onClick={() => {
+                    {
+                      isLogginUser
+                        ? navigate("/companyDashboard")
+                        : navigate("/login");
+                    }
+                  }}
+                  className="text-xl font-semibold text-gray-900
                            rounded-md px-3.5 py-2.5
                            hover:bg-gray-100 hover:text-purple-500"
-              >
-                Post a Job
-              </Button>
-            </div>
+                >
+                  Post a Job
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>

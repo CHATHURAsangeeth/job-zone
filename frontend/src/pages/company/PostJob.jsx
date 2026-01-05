@@ -1,26 +1,7 @@
-
 import React, { useState } from "react";
-
-/** ------------------------------
- * Demo option lists (replace with your API data)
- * ------------------------------ */
-const CATEGORIES = [
-  "IT & Software",
-  "Finance",
-  "Marketing & Sales",
-  "Design",
-  "Human Resources",
-  "Operations",
-  "Product",
-];
-
-const JOB_TYPES = [
-  "Full-time",
-  "Part-time",
-  "Contract",
-  "Internship",
-  "Remote",
-];
+import { postAJob } from "../../services/api.service";
+import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 /** ------------------------------
  * Small inline icons
@@ -31,21 +12,24 @@ const ChevronDown = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
-const Dollar = ({ className = "w-5 h-5" }) => (
+const Calendar = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
     <path
-      d="M12 3v18M16.5 7.5a4 4 0 00-8 0c0 2.5 4 3 4 3s4 .5 4 3a4 4 0 01-8 0"
-      stroke="currentColor"
-      strokeWidth="1.6"
-      strokeLinecap="round"
-      strokeLinejoin="round"
+      d="M19 4h-1V2h-2v2H8V2H6v2H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V6a2 2 0 00-2-2zm0 16H5V9h14v11z"
+      fill="currentColor"
     />
   </svg>
 );
 
 const BackArrow = ({ className = "w-5 h-5" }) => (
   <svg className={className} viewBox="0 0 24 24" fill="none">
-    <path d="M15 19l-7-7 7-7" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" />
+    <path
+      d="M15 19l-7-7 7-7"
+      stroke="currentColor"
+      strokeWidth="1.8"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    />
   </svg>
 );
 
@@ -61,7 +45,7 @@ const FieldLabel = ({ children, required }) => (
 const ErrorText = ({ children }) =>
   children ? <p className="mt-1 text-xs text-red-600">{children}</p> : null;
 
-const Select = ({ value, onChange, placeholder, options }) => (
+const Select = ({ value, onChange, placeholder, options, children }) => (
   <div className="relative">
     <select
       value={value}
@@ -69,11 +53,12 @@ const Select = ({ value, onChange, placeholder, options }) => (
       className="w-full appearance-none rounded-lg border border-gray-300 bg-white px-3 py-2 pr-9 text-sm text-gray-900 shadow-sm outline-none transition hover:bg-gray-50 focus:border-blue-600"
     >
       <option value="">{placeholder}</option>
-      {options.map((opt) => (
-        <option key={opt} value={opt}>
-          {opt}
-        </option>
-      ))}
+      {children ||
+        options?.map((opt) => (
+          <option key={opt} value={opt}>
+            {opt}
+          </option>
+        ))}
     </select>
     <span className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 text-gray-500">
       <ChevronDown />
@@ -91,32 +76,18 @@ const Textarea = ({ value, onChange, placeholder, rows = 6 }) => (
   />
 );
 
-const CurrencyInput = ({ value, onChange, placeholder }) => (
-  <div className="relative">
-    <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
-      <Dollar />
-    </span>
-    <input
-      inputMode="decimal"
-      value={value}
-      onChange={onChange}
-      placeholder={placeholder}
-      className="w-full rounded-lg border border-gray-300 bg-white pl-10 pr-3 py-2 text-sm text-gray-900 shadow-sm outline-none transition focus:border-blue-600"
-    />
-  </div>
-);
-
 /** ------------------------------
- * Main component
+ * Main component - Adapted to Job model
  * ------------------------------ */
 const PostJob = () => {
+  const navigate = useNavigate();
   const [form, setForm] = useState({
-    category: "",
-    jobType: "",
+    title: "",
     description: "",
-    requirements: "",
-    minSalary: "",
-    maxSalary: "",
+    location: "",
+    pay: "",
+    hours: "",
+    deadline: "",
   });
 
   const [errors, setErrors] = useState({});
@@ -129,24 +100,19 @@ const PostJob = () => {
   const validate = () => {
     const e = {};
 
-    if (!form.category) e.category = "Please select a category.";
-    if (!form.jobType) e.jobType = "Please select a job type.";
-
-    if (!form.description || form.description.trim().length < 10) {
-      e.description = "Please provide a meaningful job description (min 10 chars).";
+    if (!form.title.trim()) e.title = "Job title is required.";
+    if (!form.description.trim() || form.description.trim().length < 20) {
+      e.description =
+        "Please provide a detailed job description (min 20 characters).";
     }
 
-    if (!form.requirements || form.requirements.trim().length < 10) {
-      e.requirements = "Please list key qualifications (min 10 chars).";
+    const payNum = parseFloat(form.pay);
+    if (form.pay && (isNaN(payNum) || payNum < 0)) {
+      e.pay = "Please enter a valid positive salary amount.";
     }
 
-    const min = parseFloat(form.minSalary);
-    const max = parseFloat(form.maxSalary);
-
-    if (Number.isNaN(min)) e.minSalary = "Enter a valid minimum salary.";
-    if (Number.isNaN(max)) e.maxSalary = "Enter a valid maximum salary.";
-    if (!Number.isNaN(min) && !Number.isNaN(max) && min > max) {
-      e.maxSalary = "Max should be greater than or equal to Min.";
+    if (form.deadline && isNaN(Date.parse(form.deadline))) {
+      e.deadline = "Please enter a valid date.";
     }
 
     setErrors(e);
@@ -157,23 +123,29 @@ const PostJob = () => {
     e.preventDefault();
     if (!validate()) return;
 
-    // Prepare payload (replace with API call)
     const payload = {
       ...form,
-      minSalary: parseFloat(form.minSalary),
-      maxSalary: parseFloat(form.maxSalary),
-      createdAt: new Date().toISOString(),
+      pay: form.pay ? parseFloat(form.pay) : undefined,
+      deadline: form.deadline
+        ? new Date(form.deadline).toISOString()
+        : undefined,
+      // company_id will be added on the backend (from authenticated user)
+      status: "active",
     };
 
-    console.log("POST JOB PAYLOAD:", payload);
-    alert("Job posted (demo). Check console for payload.");
-    // Reset form (optional)
-    // setForm({ category: "", jobType: "", description: "", requirements: "", minSalary: "", maxSalary: "" });
+    postAJob(payload)
+      .then(() => {
+        toast.success("Job created successfully!");
+        navigate("/company/manage-jobs");
+      })
+      .catch((err) => {
+        toast.error(err.message);
+      });
   };
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 mt-16 mb-16">
-      {/* Header row with back button + title */}
+      {/* Header */}
       <div className="mb-5 flex items-center gap-3">
         <button
           type="button"
@@ -183,130 +155,137 @@ const PostJob = () => {
           <BackArrow />
           Back
         </button>
-
-        <h2 className="text-xl font-semibold text-gray-900">
-          Post Job
-        </h2>
+        <h2 className="text-xl font-semibold text-gray-900">Post a New Job</h2>
       </div>
 
       {/* Greeting */}
-      <div className="mb-4">
+      <div className="mb-6">
         <p className="text-sm text-gray-500">Welcome back!</p>
         <h1 className="mt-1 text-2xl font-semibold text-gray-900">
-          Here’s what’s happening with your jobs today.
+          Create a new job posting
         </h1>
       </div>
 
-      {/* Form card */}
+      {/* Form */}
       <form
         onSubmit={handleSubmit}
-        className="rounded-2xl border border-gray-200 bg-white p-5 shadow-sm"
+        className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
       >
-        {/* Top row: Category + Job type */}
-        <div className="grid gap-4 md:grid-cols-2">
+        {/* Job Name & Title */}
+        <div className="grid gap-5 md:grid-cols-2">
           <div>
-            <FieldLabel required>Select a category</FieldLabel>
-            <Select
-              value={form.category}
-              onChange={(e) => setField("category", e.target.value)}
-              placeholder="Select a category"
-              options={CATEGORIES}
+            <FieldLabel required>Job Title</FieldLabel>
+            <input
+              type="text"
+              value={form.title}
+              onChange={(e) => setField("title", e.target.value)}
+              placeholder="e.g. Senior Frontend Engineer"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
             />
-            <ErrorText>{errors.category}</ErrorText>
-          </div>
-
-          <div>
-            <FieldLabel required>Select job type</FieldLabel>
-            <Select
-              value={form.jobType}
-              onChange={(e) => setField("jobType", e.target.value)}
-              placeholder="Select job type"
-              options={JOB_TYPES}
-            />
-            <ErrorText>{errors.jobType}</ErrorText>
+            <ErrorText>{errors.title}</ErrorText>
+            <p className="mt-1 text-xs text-gray-500">
+              Usually the same as Job Name
+            </p>
           </div>
         </div>
 
-        {/* Job Description */}
+        {/* Description */}
         <div className="mt-5">
           <FieldLabel required>Job Description</FieldLabel>
           <Textarea
             value={form.description}
             onChange={(e) => setField("description", e.target.value)}
-            placeholder="Describe the role and responsibilities..."
+            placeholder="Describe the role, responsibilities, team, and what success looks like..."
             rows={8}
           />
-          <p className="mt-1 text-xs text-gray-500">
-            Include key responsibilities, day-to-day tasks, and what makes this role exciting.
-          </p>
           <ErrorText>{errors.description}</ErrorText>
         </div>
 
-        {/* Requirements */}
-        <div className="mt-5">
-          <FieldLabel required>Requirements</FieldLabel>
-          <Textarea
-            value={form.requirements}
-            onChange={(e) => setField("requirements", e.target.value)}
-            placeholder="List key qualifications and skills..."
-            rows={6}
-          />
-          <p className="mt-1 text-xs text-gray-500">
-            Include required skills, experience level, education, and any preferred qualifications.
-          </p>
-          <ErrorText>{errors.requirements}</ErrorText>
-        </div>
-
-        {/* Salary Range */}
-        <div className="mt-5">
-          <FieldLabel required>Salary Range</FieldLabel>
-          <div className="grid gap-3 md:grid-cols-2">
-            <CurrencyInput
-              value={form.minSalary}
-              onChange={(e) => setField("minSalary", e.target.value)}
-              placeholder="Min"
-            />
-            <CurrencyInput
-              value={form.maxSalary}
-              onChange={(e) => setField("maxSalary", e.target.value)}
-              placeholder="Max"
+        {/* Location & Hours */}
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <div>
+            <FieldLabel>Location</FieldLabel>
+            <input
+              type="text"
+              value={form.location}
+              onChange={(e) => setField("location", e.target.value)}
+              placeholder="e.g. Colombo ,Malabe, Kandy"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
             />
           </div>
-          <div className="grid gap-3 md:grid-cols-2">
-            <ErrorText>{errors.minSalary}</ErrorText>
-            <ErrorText>{errors.maxSalary}</ErrorText>
+
+          <div>
+            <FieldLabel>Work Hours</FieldLabel>
+            <Select
+              value={form.hours}
+              onChange={(e) => setField("hours", e.target.value)}
+              placeholder="Select or type custom"
+            >
+              <option value="Full-time">Full-time</option>
+              <option value="Part-time">Part-time</option>
+              <option value="Remote">Remote</option>
+            </Select>
           </div>
         </div>
 
-        {/* Submit */}
-        <div className="mt-6 flex items-center justify-end gap-3">
+        {/* Pay & Deadline */}
+        <div className="mt-5 grid gap-5 md:grid-cols-2">
+          <div>
+            <FieldLabel>Salary (USD)</FieldLabel>
+            <input
+              type="number"
+              min="0"
+              step="1000"
+              value={form.pay}
+              onChange={(e) => setField("pay", e.target.value)}
+              placeholder="salary for day or hour"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
+            />
+            <ErrorText>{errors.pay}</ErrorText>
+          </div>
+
+          <div>
+            <FieldLabel>Application Deadline</FieldLabel>
+            <div className="relative">
+              <input
+                type="date"
+                value={form.deadline}
+                onChange={(e) => setField("deadline", e.target.value)}
+                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 pl-10 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
+              />
+              <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
+                <Calendar />
+              </span>
+            </div>
+            <ErrorText>{errors.deadline}</ErrorText>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 flex justify-end gap-3">
           <button
             type="button"
-            className="rounded-lg border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:bg-gray-50"
             onClick={() =>
               setForm({
-                category: "",
-                jobType: "",
+                name: "",
+                title: "",
                 description: "",
-                requirements: "",
-                minSalary: "",
-                maxSalary: "",
+                location: "",
+                pay: "",
+                hours: "",
+                deadline: "",
               })
             }
+            className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"
           >
             Reset
           </button>
+
           <button
             type="submit"
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
-            disabled={
-              !form.category ||
-              !form.jobType ||
-              !form.description ||
-              !form.requirements ||
-              !form.minSalary ||
-              !form.maxSalary
-            }
+            onClick={handleSubmit}
+            className="rounded-lg bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 disabled:opacity-60"
+            disabled={!form.title || !form.description}
           >
             Post Job
           </button>
@@ -317,4 +296,3 @@ const PostJob = () => {
 };
 
 export default PostJob;
-
