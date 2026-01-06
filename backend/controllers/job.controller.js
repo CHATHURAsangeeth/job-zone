@@ -182,6 +182,7 @@ export const applyJob = async (req, res, next) => {
     const { jobId } = req.params;
     const studentId = req.user.id;
     const studentName = req.user.name;
+    const studentEmail = req.user.email;
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -215,6 +216,7 @@ export const applyJob = async (req, res, next) => {
       company_id: company_id,
       job_id: jobId,
       student_name: studentName,
+      student_email: studentEmail,
       job_title,
       status: "Pending",
     });

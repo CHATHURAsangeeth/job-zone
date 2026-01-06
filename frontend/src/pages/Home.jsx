@@ -5,7 +5,8 @@ import { useNavigate } from "react-router-dom";
 export default function Home() {
   const isLogginUser = isUserLoggedIn();
   const navigate = useNavigate();
-  const { user } = isLogginUser ? loggedUserData() : { user: null };
+  const { user } = isLogginUser && loggedUserData();
+
   return (
     // ✅ FULL-WIDTH SECTION (background & positioning)
     <section className="relative isolate w-full overflow-hidden h-full">
@@ -49,7 +50,7 @@ export default function Home() {
               next career move or perfect candidate is just one click away.
             </p>
 
-            {user.role == "student" ? (
+            {user &&user.role == "student" ? (
               <div className="mt-10 flex items-center justify-center gap-x-6">
                 <Button
                   onClick={() => {

@@ -1,3 +1,4 @@
+import { toast } from "react-toastify";
 import { VITE_API_BASE_URL } from "../../config/env.js";
 import { loggedUserData } from "./auth.service.js";
 const { token } = loggedUserData();
@@ -119,9 +120,10 @@ export async function fetchApplicationsByCompanyId() {
       throw new Error(response.statusText);
     }
     const data = await response.json();
-
+    toast.success(data.message);
     return data;
   } catch (err) {
+    toast.error(err.message);
     throw err;
   }
 }
@@ -163,3 +165,4 @@ export async function postAJob(payload) {
     throw error;
   }
 }
+

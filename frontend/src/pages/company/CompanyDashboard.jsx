@@ -1,11 +1,11 @@
-import React, { useEffect, useState } from "react";
-import {
-  fetchApplicationsByCompanyId,
-  fetchJobPostsByCompanyId,
-} from "../../services/api.service";
-import { toast } from "react-toastify";
+import { useQuery } from "@tanstack/react-query";
+//import { toast } from "react-toastify";
 import { timeFilter } from "../../constants/timeFilter";
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
+import { fetchApplications, fetchJobs } from "../../controllers/api.controller";
+import LoadingSnippet from "../../components/LoadingSnippet";
+import { toast } from "react-toastify";
+
 
 const quickActions = [
   { id: "post", label: "Post a Job", icon: "plus" },
@@ -316,29 +316,32 @@ const QuickAction = ({ label, icon, onClick = () => {} }) => (
  * Main Component
  * ------------------------------ */
 const CompanyDashboard = () => {
-  const [recentJobs, setRecentJobs] = useState([]);
-  const [recentApplications, setRecentApplications] = useState([]);
-  useEffect(() => {
-    fetchJobPostsByCompanyId()
-      .then((data) => {
-        toast.success(data.message);
+  const {
+    data: recentJobs = [],
+    isLoading: jobsLoading,
+    error: jobsError,
+  } = useQuery({
+    queryKey: ["companyJobs"],
+    queryFn: fetchJobs,
+  });
 
-        setRecentJobs(data.data);
-      })
-      .catch((err) => toast.error(err.message));
-
-    fetchApplicationsByCompanyId()
-      .then((applicationdata) => {
-        toast.success(applicationdata.message);
-
-        setRecentApplications(applicationdata.data);
-      })
-      .catch((err) => {
-        toast.error(err.message);
-      });
-  }, []);
+  const {
+    data: recentApplications = [],
+    isLoading: appsLoading,
+    error: appsError,
+  } = useQuery({
+    queryKey: ["companyApplications"],
+    queryFn: fetchApplications,
+  });
 
   const navigate = useNavigate();
+  if (jobsLoading || appsLoading) {
+    return <LoadingSnippet/>;
+  }
+
+  if (jobsError || appsError) {
+    return toast.error(jobsError?.message || appsError?.message);
+  }
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-6 m-16">
@@ -363,7 +366,11 @@ const CompanyDashboard = () => {
         <KPI
           key="applicants"
           label="Total Applicants"
-          value={recentApplications.filter((application) => application.status === "Pending").length}
+          value={
+            recentApplications?.filter(
+              (application) => application.status === "Pending"
+            ).length
+          }
           trend="100%"
           color="bg-emerald-600"
           icon="users"
@@ -428,14 +435,11 @@ const CompanyDashboard = () => {
 
           <div className="space-y-3">
             {recentApplications
-              .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // newest first
+              ?.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) // newest first
               .slice(0, 3) // take only the first 3 jobs
               .map((application) => (
                 <ApplicationRow key={application._id} app={application} />
               ))}
-            {/* {recentApplications.map((app) => (
-              <ApplicationRow key={app.id} app={app} />
-            ))} */}
           </div>
         </section>
       </div>
@@ -452,10 +456,11 @@ const CompanyDashboard = () => {
               label={qa.label}
               icon={qa.icon}
               onClick={() => {
-                if(qa.id === "post") navigate("/companyDashboard/post-job");
-                if(qa.id === "manage") navigate("/companyDashboard/manage-jobs");
-                if(qa.id === "applications") navigate("/companyDashboard/applications");
-                
+                if (qa.id === "post") navigate("/companyDashboard/post-job");
+                if (qa.id === "manage")
+                  navigate("/companyDashboard/manage-jobs");
+                if (qa.id === "applications")
+                  navigate("/companyDashboard/applications");
               }}
             />
           ))}

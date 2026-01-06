@@ -1,54 +1,42 @@
+import { useQuery } from "@tanstack/react-query";
+import React, { useState } from "react";
+import { fetchApplications } from "../../controllers/api.controller";
+import LoadingSnippet from "../../components/LoadingSnippet";
+import { toast } from "react-toastify";
 
-import React from "react";
 
-/**
- * Demo applications data (similar to the screenshot).
- * You can replace this with data fetched from your API.
- */
-const demoApplications = [
-  {
-    id: 1,
-    name: "Michael Wilson",
-    email: "user2@timetoprogram.com",
-    appliedOn: "Applied 5th 07 2025",
-    avatar: "https://i.pravatar.cc/80?img=12",
-    status: "Applied",
-    resumeUrl: "#",
-    profileUrl: "#",
-  },
-  {
-    id: 2,
-    name: "Jennifer Miller",
-    email: "user3@timetoprogram.com",
-    appliedOn: "Applied 5th 07 2025",
-    avatar: "https://i.pravatar.cc/80?img=47",
-    status: "Applied",
-    resumeUrl: "#",
-    profileUrl: "#",
-  },
-  {
-    id: 3,
-    name: "William Anderson",
-    email: "user4@timetoprogram.com",
-    appliedOn: "Applied 5th 07 2025",
-    avatar: "https://i.pravatar.cc/80?img=36",
-    status: "Applied",
-    resumeUrl: "#",
-    profileUrl: "#",
-  },
-  {
-    id: 4,
-    name: "David Jackson",
-    email: "user5@timetoprogram.com",
-    appliedOn: "Applied 5th 07 2025",
-    avatar: "https://i.pravatar.cc/80?img=22",
-    status: "Applied",
-    resumeUrl: "#",
-    profileUrl: "#",
-  },
-];
+/** Colored avatar with initials fallback */
+const ColoredAvatar = ({ name, size = "h-12 w-12" }) => {
+  const initials = name
+    .split(" ")
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 
-/** Small inline icons (no external libraries) */
+  const colors = [
+    "bg-blue-500",
+    "bg-purple-500",
+    "bg-green-500",
+    "bg-pink-500",
+    "bg-indigo-500",
+    "bg-teal-500",
+    "bg-orange-500",
+    "bg-red-500",
+  ];
+
+  const colorIndex = name.charCodeAt(0) % colors.length;
+
+  return (
+    <div
+      className={`${size} ${colors[colorIndex]} rounded-full flex items-center justify-center text-white font-semibold text-lg ring-1 ring-gray-200`}
+    >
+      {initials}
+    </div>
+  );
+};
+
+/** Inline Icons */
 const MapPinIcon = ({ className = "w-4 h-4" }) => (
   <svg
     className={className}
@@ -108,12 +96,24 @@ const DownloadIcon = ({ className = "w-5 h-5" }) => (
   </svg>
 );
 
-/** A pill-style label used for the "Applied" status */
-const StatusPill = ({ text = "Applied" }) => (
-  <span className="inline-flex items-center rounded-md bg-gray-100 text-gray-700 px-3 py-1 text-sm font-medium">
-    {text}
-  </span>
-);
+/** Status Pill with colors */
+const StatusPill = ({ status = "Pending" }) => {
+  const statusStyles = {
+    Pending: "bg-yellow-100 text-yellow-800",
+    Accepted: "bg-green-100 text-green-800",
+    Rejected: "bg-red-100 text-red-800",
+  };
+
+  return (
+    <span
+      className={`inline-flex items-center rounded-md px-3 py-1 text-sm font-medium ${
+        statusStyles[status] || statusStyles.Pending
+      }`}
+    >
+      {status}
+    </span>
+  );
+};
 
 const SectionHeader = () => (
   <div className="flex items-center justify-between">
@@ -123,43 +123,18 @@ const SectionHeader = () => (
         Applications Overview
       </h1>
     </div>
-
-    {/* Optional actions (search, filters, etc.) can be added here */}
   </div>
 );
 
-const JobBanner = ({ title, location, isRemote, category, count }) => (
+const JobBanner = ({ title, count = 0 }) => (
   <div className="relative overflow-hidden rounded-xl bg-blue-600 p-5 text-white shadow-sm">
     <div className="flex items-center justify-between">
-      <div className="space-y-2">
+      {/* Title Section */}
+      <div>
         <h2 className="text-xl font-semibold">{title}</h2>
-        <div className="flex flex-wrap items-center gap-3 text-sm">
-          <span className="inline-flex items-center gap-1">
-            <MapPinIcon className="w-4 h-4" />
-            {location}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <LaptopIcon className="w-4 h-4" />
-            {isRemote ? "Remote" : "On-site"}
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <svg
-              className="w-4 h-4"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-            >
-              <path
-                d="M4 6h16M4 12h16M4 18h16"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-              />
-            </svg>
-            {category}
-          </span>
-        </div>
       </div>
 
+      {/* Count Section */}
       <span className="rounded-lg bg-blue-500/30 px-4 py-2 text-sm font-medium">
         {count} Applications
       </span>
@@ -168,21 +143,25 @@ const JobBanner = ({ title, location, isRemote, category, count }) => (
 );
 
 const ApplicationItem = ({ app }) => {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const formattedDate = new Date(app.applied_at).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  });
+
   return (
     <div className="group rounded-xl border border-gray-200 bg-white px-4 py-4 shadow-sm transition hover:bg-gray-50">
       <div className="flex items-center justify-between gap-4">
-        {/* Left: avatar + applicant info */}
         <div className="flex items-center gap-4">
-          <img
-            src={app.avatar}
-            alt={app.name}
-            className="h-12 w-12 rounded-full object-cover ring-1 ring-gray-200"
-          />
+          <ColoredAvatar name={app.student_name} />
           <div>
             <h3 className="text-base font-semibold text-gray-900">
-              {app.name}
+              {app.student_name}
             </h3>
-            <p className="text-sm text-gray-600">{app.email}</p>
+            <p className="text-sm text-gray-600">
+              Applied for: {app.job_title}
+            </p>
             <p className="mt-1 flex items-center gap-1 text-xs text-gray-500">
               <svg
                 className="w-4 h-4"
@@ -195,52 +174,155 @@ const ApplicationItem = ({ app }) => {
                   strokeWidth="1.4"
                 />
               </svg>
-              {app.appliedOn}
+              Applied {formattedDate}
             </p>
           </div>
         </div>
 
-        {/* Right: status + actions */}
         <div className="flex items-center gap-3">
-          <StatusPill text={app.status} />
-
-          <a
-            href={app.resumeUrl}
+          <StatusPill status={app.status} />
+          <button
             className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
             title="Download resume"
+            onClick={() => alert("Resume download feature coming soon!")}
           >
-            <DownloadIcon className="w-5 h-5" />
+            <DownloadIcon />
             Resume
-          </a>
-
-          <a
-            href={app.profileUrl}
+          </button>
+          <button
             className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:bg-gray-100"
             title="View profile"
+            onClick={() => setIsModalOpen(true)}
           >
-            <EyeIcon className="w-5 h-5" />
+            <EyeIcon />
             View Profile
-          </a>
+          </button>
         </div>
       </div>
+      {/* Modal */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 w-full flex items-center justify-center overflow-x-auto overflow-y-auto outline-none focus:outline-none">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black opacity-50"
+            onClick={() => setIsModalOpen(false)}
+          />
+
+          {/* Modal Content */}
+          <div className="relative w-[450px] max-w-2xl mx-auto my-6">
+            <div className="relative flex flex-col bg-white border-0 rounded-lg shadow-lg outline-none focus:outline-none">
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200">
+                <h3 className="text-2xl font-semibold">Applicant Profile</h3>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="text-gray-400 hover:text-gray-600 text-3xl"
+                >
+                  &times;
+                </button>
+              </div>
+
+              {/* Body - Matching your screenshot */}
+              <div className="relative p-8 flex-auto">
+                <div className="flex flex-col items-center text-center">
+                  <ColoredAvatar name="Jennifer Miller" />
+                  <h4 className="text-xl font-bold">{app.student_name}</h4>
+                  <p className="text-gray-600">{app.student_email}</p>
+                </div>
+
+                <div className="mt-8 space-y-6">
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h5 className="font-semibold">Applied Position</h5>
+                    <p>{app.job_title}</p>
+                  </div>
+
+                  <div className="bg-gray-50 p-4 rounded-lg">
+                    <h5 className="font-semibold">Application Details</h5>
+                    <div className="flex justify-between items-center">
+                      <div>
+                        <p>Status:</p>
+                        <p>Applied Date:</p>
+                      </div>
+                      <div className="text-right">
+                        <StatusPill status={app.status} />
+                        <p>{formattedDate}</p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                    <svg
+                      xmlns="http://www.w3.org/2000/svg"
+                      className="h-5 w-5"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
+                      />
+                    </svg>
+                    Download Resume
+                  </button>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                      Change Application Status
+                    </label>
+                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg">
+                      <option>Applied</option>
+                      <option>Reviewed</option>
+                      <option>Interview</option>
+                      <option>Rejected</option>
+                      <option>Hired</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
 const Application = () => {
-  // You can pass job details via props or route state; hardcoded here to match screenshot.
-  const jobInfo = {
-    title: "DevOps Engineer",
-    location: "Amsterdam, Netherlands",
-    isRemote: true,
-    category: "IT & Software",
-  };
+  
+let dummyApplications;
+  const {data: applications = [],isLoading: applicationsLoading,error: applicationsError} = useQuery({
+    queryKey:['companyApplications'],
+    queryFn: fetchApplications,
+  })
+  dummyApplications = applications.reduce((acc, app) => {
+  // Check if job already exists
+  let job = acc.find((j) => j.id === app.job_id);
+  if (job) {
+    job.content.push(app);
+  } else {
+    acc.push({
+      id: app.job_id,
+      title: app.job_title,
+      content: [app],
+    });
+  }
+  return acc;
+}, []);
+
+if(applicationsLoading) {
+  return <LoadingSnippet/>;
+}
+if(applicationsError) {
+  return toast.error(applicationsError?.message);
+}
 
   return (
-    <div className="mx-auto max-w-5xl px-4 py-6 m-16">
-      {/* Top header */}
+    <div className="mx-auto max-w-5xl px-4 py-6 mt-16">
+      {/* Back button + header */}
       <div className="mb-5">
-        {/* Back button row */}
         <div className="mb-3 flex items-center gap-3">
           <button
             type="button"
@@ -262,31 +344,34 @@ const Application = () => {
             </svg>
             Back
           </button>
-
           <h2 className="text-xl font-semibold text-gray-900">
             Applications Overview
           </h2>
         </div>
-
-        {/* Greeting + title */}
         <SectionHeader />
       </div>
+      {/* Applications List */}
+<div className="mt-6 space-y-4">
+  {dummyApplications.length === 0 ? (
+    <p className="text-center text-gray-500 py-8">
+      No applications yet.
+    </p>
+  ) : (
+    dummyApplications.map((job) => (
+      <React.Fragment key={job.title}>
+        <JobBanner title={job.title} count={job.content.length} />
 
-      {/* Job banner */}
-      <JobBanner
-        title={jobInfo.title}
-        location={jobInfo.location}
-        isRemote={jobInfo.isRemote}
-        category={jobInfo.category}
-        count={demoApplications.length}
-      />
-
-      {/* Applications list */}
-      <div className="mt-4 space-y-4">
-        {demoApplications.map((app) => (
-          <ApplicationItem key={app.id} app={app} />
+        {job.content.map((application) => (
+          <ApplicationItem
+            key={application._id}
+            app={application}
+          />
         ))}
-      </div>
+      </React.Fragment>
+    ))
+  )}
+</div>
+
     </div>
   );
 };

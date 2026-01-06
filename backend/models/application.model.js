@@ -19,6 +19,7 @@ const applicationSchema = new mongoose.Schema(
       required: true,
     },
     student_name: { type: String, required: true },
+    student_email: { type: String, required: true },
     job_title: { type: String},
     status: {
       type: String,
