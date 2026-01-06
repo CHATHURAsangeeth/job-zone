@@ -183,6 +183,7 @@ export const applyJob = async (req, res, next) => {
     const studentId = req.user.id;
     const studentName = req.user.name;
     const studentEmail = req.user.email;
+    const studentResume = req.user.resume_url;
 
     const job = await Job.findById(jobId);
     if (!job) {
@@ -217,9 +218,16 @@ export const applyJob = async (req, res, next) => {
       job_id: jobId,
       student_name: studentName,
       student_email: studentEmail,
+      resume_url: studentResume,
       job_title,
       status: "Pending",
     });
+
+    await Job.findByIdAndUpdate(
+      jobId,
+      { $inc: { applicationsCount: 1 } },
+      { new: true }
+    );
 
     await session.commitTransaction();
     await session.endSession();
@@ -282,7 +290,7 @@ export const updateJobByCompany = async (req, res, next) => {
     }
 
     const allowedUpdates = [
-      "title",
+      "jobCategory",
       "description",
       "location",
       "pay",
@@ -374,10 +382,12 @@ export const deleteJob = async (req, res, next) => {
     }
 
     session.startTransaction();
+    // Delete all applications for this job
+    await Application.deleteMany({ job_id: jobId }, { session });
 
-    await job.deleteOne();
+    // Delete the job itself
+    await Job.deleteOne({ _id: jobId }, { session });
     await session.commitTransaction();
-    await session.endSession();
 
     return res.status(200).json({
       success: true,

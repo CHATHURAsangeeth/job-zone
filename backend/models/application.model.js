@@ -20,10 +20,11 @@ const applicationSchema = new mongoose.Schema(
     },
     student_name: { type: String, required: true },
     student_email: { type: String, required: true },
+    resume_url: { type: String, required: true },
     job_title: { type: String},
     status: {
       type: String,
-      enum: ["Pending", "Accepted", "Rejected"],
+      enum: ["Pending", "Accepted", "Rejected","Interview"],
       default: "Pending",
     },
     applied_at: { type: Date, default: Date.now },

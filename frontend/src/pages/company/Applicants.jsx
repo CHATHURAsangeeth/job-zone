@@ -1,9 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { fetchApplications } from "../../controllers/api.controller";
+import {
+  fetchApplications,
+  handleApplicationStatus,
+} from "../../controllers/api.controller";
 import LoadingSnippet from "../../components/LoadingSnippet";
 import { toast } from "react-toastify";
-
 
 /** Colored avatar with initials fallback */
 const ColoredAvatar = ({ name, size = "h-12 w-12" }) => {
@@ -149,6 +151,7 @@ const ApplicationItem = ({ app }) => {
     month: "short",
     year: "numeric",
   });
+  const [status, setStatus] = useState("Pending");
 
   return (
     <div className="group rounded-xl border border-gray-200 bg-white px-4 py-4 shadow-sm transition hover:bg-gray-50">
@@ -181,14 +184,15 @@ const ApplicationItem = ({ app }) => {
 
         <div className="flex items-center gap-3">
           <StatusPill status={app.status} />
-          <button
-            className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
-            title="Download resume"
-            onClick={() => alert("Resume download feature coming soon!")}
-          >
-            <DownloadIcon />
-            Resume
-          </button>
+          <a href={app.resume_url} target="_blank">
+            <button
+              className="inline-flex items-center gap-2 rounded-md bg-blue-600 px-3 py-2 text-sm font-medium text-white shadow-sm transition hover:bg-blue-700"
+              title="Download resume"
+            >
+              <DownloadIcon />
+              Resume
+            </button>
+          </a>
           <button
             className="inline-flex items-center gap-2 rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-800 shadow-sm transition hover:bg-gray-100"
             title="View profile"
@@ -250,36 +254,69 @@ const ApplicationItem = ({ app }) => {
                     </div>
                   </div>
 
-                  <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
-                      />
-                    </svg>
-                    Download Resume
-                  </button>
+                  <a href={app.resume_url} target="_blank" rel="noreferrer">
+                    <button className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                      <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        className="h-5 w-5"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4-4m0 0l-4 4m4-4v12"
+                        />
+                      </svg>
+                      Download Resume
+                    </button>
+                  </a>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
                       Change Application Status
                     </label>
-                    <select className="w-full px-4 py-2 border border-gray-300 rounded-lg">
-                      <option>Applied</option>
-                      <option>Reviewed</option>
-                      <option>Interview</option>
-                      <option>Rejected</option>
-                      <option>Hired</option>
+                    <select
+                      value={status}
+                      onChange={(e) => setStatus(e.target.value)}
+                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
+                    >
+                      <option value="Pending">Pending</option>
+                      <option value="Interview">Interview</option>
+                      <option value="Rejected">Rejected</option>
+                      <option value="Accepted">Accepted</option>
                     </select>
                   </div>
+                  {(status === "Interview" ||
+                    status === "Rejected" ||
+                    status === "Accepted") && (
+                    <button
+                      onClick={async () => {
+                        try {
+                          const res = await handleApplicationStatus({
+                            applicationId: app._id,
+                            status: status,
+                          });
+                          if (res.success) {
+                            toast.success(
+                              "Application Status Update successfully"
+                            );
+                          }
+                        } catch (error) {
+                          toast.error(error.message);
+                        } finally {
+                          setTimeout(() => {
+                            window.location.reload();
+                          }, 1000);
+                        }
+                      }}
+                      className="w-full py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2"
+                    >
+                      Update Application Status
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -291,33 +328,36 @@ const ApplicationItem = ({ app }) => {
 };
 
 const Application = () => {
-  
-let dummyApplications;
-  const {data: applications = [],isLoading: applicationsLoading,error: applicationsError} = useQuery({
-    queryKey:['companyApplications'],
+  let dummyApplications;
+  const {
+    data: applications = [],
+    isLoading: applicationsLoading,
+    error: applicationsError,
+  } = useQuery({
+    queryKey: ["companyApplications"],
     queryFn: fetchApplications,
-  })
+  });
   dummyApplications = applications.reduce((acc, app) => {
-  // Check if job already exists
-  let job = acc.find((j) => j.id === app.job_id);
-  if (job) {
-    job.content.push(app);
-  } else {
-    acc.push({
-      id: app.job_id,
-      title: app.job_title,
-      content: [app],
-    });
-  }
-  return acc;
-}, []);
+    // Check if job already exists
+    let job = acc.find((j) => j.id === app.job_id);
+    if (job) {
+      job.content.push(app);
+    } else {
+      acc.push({
+        id: app.job_id,
+        title: app.job_title,
+        content: [app],
+      });
+    }
+    return acc;
+  }, []);
 
-if(applicationsLoading) {
-  return <LoadingSnippet/>;
-}
-if(applicationsError) {
-  return toast.error(applicationsError?.message);
-}
+  if (applicationsLoading) {
+    return <LoadingSnippet />;
+  }
+  if (applicationsError) {
+    return toast.error(applicationsError?.message);
+  }
 
   return (
     <div className="mx-auto max-w-5xl px-4 py-6 mt-16">
@@ -351,27 +391,21 @@ if(applicationsError) {
         <SectionHeader />
       </div>
       {/* Applications List */}
-<div className="mt-6 space-y-4">
-  {dummyApplications.length === 0 ? (
-    <p className="text-center text-gray-500 py-8">
-      No applications yet.
-    </p>
-  ) : (
-    dummyApplications.map((job) => (
-      <React.Fragment key={job.title}>
-        <JobBanner title={job.title} count={job.content.length} />
+      <div className="mt-6 space-y-4">
+        {dummyApplications.length === 0 ? (
+          <p className="text-center text-gray-500 py-8">No applications yet.</p>
+        ) : (
+          dummyApplications.map((job) => (
+            <React.Fragment key={job.title}>
+              <JobBanner title={job.title} count={job.content.length} />
 
-        {job.content.map((application) => (
-          <ApplicationItem
-            key={application._id}
-            app={application}
-          />
-        ))}
-      </React.Fragment>
-    ))
-  )}
-</div>
-
+              {job.content.map((application) => (
+                <ApplicationItem key={application._id} app={application} />
+              ))}
+            </React.Fragment>
+          ))
+        )}
+      </div>
     </div>
   );
 };

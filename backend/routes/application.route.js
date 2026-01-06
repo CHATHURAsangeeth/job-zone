@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { companyApplications } from "../controllers/application.controller.js";
+import { companyApplications, updateApplicationByCompany } from "../controllers/application.controller.js";
 const applicationRouter = Router();
 
 //  sees all own applications
@@ -10,7 +10,10 @@ applicationRouter.get("/", (req, res) => {
 //company
 
 // all applications for their job postings
-applicationRouter.get("/company",companyApplications);
+applicationRouter.get("/company", companyApplications);
+
+// update application by company
+applicationRouter.patch("/company/:id", updateApplicationByCompany);
 
 // specefic applications for their job
 applicationRouter.get("/company/:applicationID", (req, res) => {

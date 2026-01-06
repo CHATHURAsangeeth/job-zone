@@ -1,11 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 //import { toast } from "react-toastify";
 import { timeFilter } from "../../constants/timeFilter";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { fetchApplications, fetchJobs } from "../../controllers/api.controller";
 import LoadingSnippet from "../../components/LoadingSnippet";
 import { toast } from "react-toastify";
-
 
 const quickActions = [
   { id: "post", label: "Post a Job", icon: "plus" },
@@ -241,8 +240,16 @@ const KPI = ({ label, value, trend, color, icon }) => (
   </div>
 );
 
-const StatusBadge = ({ text = "Active" }) => (
-  <span className="inline-flex items-center rounded-full bg-emerald-50 text-emerald-700 px-3 py-1 text-sm font-medium ring-1 ring-emerald-200">
+const StatusBadge = ({ text = "active" }) => (
+  <span
+    className={`inline-flex items-center rounded-full px-3 py-1 text-sm font-medium ring-1
+        ${
+          text === "active"
+            ? "bg-green-100 text-green-700 ring-green-200"
+            : "bg-red-100 text-red-700 ring-red-200"
+        }
+      `}
+  >
     {text}
   </span>
 );
@@ -336,7 +343,7 @@ const CompanyDashboard = () => {
 
   const navigate = useNavigate();
   if (jobsLoading || appsLoading) {
-    return <LoadingSnippet/>;
+    return <LoadingSnippet />;
   }
 
   if (jobsError || appsError) {
@@ -396,12 +403,12 @@ const CompanyDashboard = () => {
               </h2>
               <p className="text-sm text-gray-500">Your latest job postings</p>
             </div>
-            <a
-              href="#/manage-jobs"
+            <Link
               className="text-sm font-medium text-blue-600 hover:text-blue-700"
+              to="/companyDashboard/manage-jobs"
             >
               View all
-            </a>
+            </Link>
           </div>
 
           <div className="space-y-3">
@@ -425,12 +432,12 @@ const CompanyDashboard = () => {
                 Latest candidate applications
               </p>
             </div>
-            <a
-              href="#/applications"
+            <Link
               className="text-sm font-medium text-blue-600 hover:text-blue-700"
+              to="/companyDashboard/applications"
             >
               View all
-            </a>
+            </Link>
           </div>
 
           <div className="space-y-3">

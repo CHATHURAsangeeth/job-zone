@@ -11,6 +11,9 @@ import "./index.css";
 import "react-toastify/dist/ReactToastify.css";
 import { ToastContainer } from "react-toastify";
 import StudentProfile from "./pages/student/Profile.jsx";
+import ManageJobs from "./pages/company/ManageJobs.jsx";
+import PostOrUpdateJob from "./pages/company/PostOrUpdateJob.jsx";
+
 
 export default function App() {
   return (
@@ -24,6 +27,8 @@ export default function App() {
           <Route path="/companyDashboard" element={<CompanyDashboard />} />
           <Route path="/companyDashboard/applications" element={<Application />} />
           <Route path="/companyDashboard/post-job" element={<PostJob />} />
+          <Route path="/companyDashboard/manage-jobs" element={<ManageJobs />} />
+          <Route path="/companyDashboard/:id/update-jobs" element={<PostOrUpdateJob />} />
 
           // student routes
           <Route path="/profile" element={<StudentProfile />} />

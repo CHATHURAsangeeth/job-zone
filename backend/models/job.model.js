@@ -10,9 +10,11 @@ const jobSchema = new mongoose.Schema(
     },
     name: { type: String, required: true },
     title: { type: String, required: true },
+    jobCategory: { type: String},
     description: { type: String, required: true },
     location: { type: String },
     pay: { type: Number },
+    applicationsCount: { type: Number, default: 0 },
     hours: { type: String }, // e.g., "Part-time 20h/week"
     deadline: { type: Date },
     status: { type: String, enum: ["active", "closed"], default: "active" },

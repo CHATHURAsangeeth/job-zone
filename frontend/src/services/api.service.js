@@ -165,4 +165,136 @@ export async function postAJob(payload) {
     throw error;
   }
 }
+export async function updateAJobPost(payload) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const jobId = payload.job_id;
 
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/jobs/company/${jobId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          jobCategory: payload.jobCategory,
+          description: payload.description,
+          location: payload.location,
+          pay: payload.pay,
+          hours: payload.hours,
+          deadline: payload.deadline,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function updateAJobStatus(jobId, status) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/jobs/company/${jobId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: status,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update job status");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+export async function deleteAJob(jobId) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    if (!jobId) {
+      throw new Error("Job ID is required");
+    }
+
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/jobs/company/${jobId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to delete job");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function updateApplicationStatusByCompany(applicationId, status) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    if (!applicationId) {
+      throw new Error("applicationId  is required");
+    }
+
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/applications/company/${applicationId}`,
+      {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify({
+          status: status,
+        }),
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to update application status");
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
