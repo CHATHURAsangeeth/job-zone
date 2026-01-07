@@ -4,27 +4,18 @@ import Application from "../models/application.model.js";
 
 export const getAllJobs = async (req, res, next) => {
   try {
-    // Optional: Pagination
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const skip = (page - 1) * limit;
-
     // Optional: Filtering by status
     const statusFilter = req.query.status || "active";
 
     const jobs = await Job.find({ status: statusFilter })
       .populate("company_id", "name email")
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit);
+      .sort({ createdAt: -1 });
 
     const totalJobs = await Job.countDocuments({ status: statusFilter });
 
     res.status(200).json({
       success: true,
       total: totalJobs,
-      page,
-      pageSize: jobs.length,
       data: jobs,
     });
   } catch (error) {

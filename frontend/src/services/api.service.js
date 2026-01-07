@@ -298,3 +298,55 @@ export async function updateApplicationStatusByCompany(applicationId, status) {
     throw error;
   }
 }
+
+export async function studentApplyForJob(id) {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    if (!id) {
+      throw new Error("Student ID is required");
+    }
+
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/jobs/${id}/details/apply`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.message);
+    }
+
+    return data;
+  } catch (error) {
+    throw error;
+  }
+}
+
+export async function fetchAllJobPosts() {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await fetch(`${VITE_API_BASE_URL}/api/allJobs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+       // Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}

@@ -11,6 +11,7 @@ import errorMiddleware from "./middleware.js/error.middleware.js";
 import cookieParser from "cookie-parser";
 import { authorize } from "./middleware.js/auth.middleware.js";
 import cors from "cors";
+import { getAllJobs } from "./controllers/job.controller.js";
 
 const app = express();
 app.use(
@@ -26,6 +27,7 @@ app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
 app.use("/api/jobs", authorize, jobRouter);
+app.use("/api/allJobs", getAllJobs);
 app.use("/api/applications", authorize, applicationRouter);
 app.use("/api/companies", authorize, companyRouter);
 

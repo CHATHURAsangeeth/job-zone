@@ -1,4 +1,5 @@
 import {
+  fetchAllJobPosts,
   fetchApplicationsByCompanyId,
   fetchJobPostsByCompanyId,
   updateAJobStatus,
@@ -12,6 +13,11 @@ export const fetchJobs = async () => {
 
 export const fetchApplications = async () => {
   const res = await fetchApplicationsByCompanyId();
+
+  return res.data;
+};
+export const fetchAllJobs = async () => {
+  const res = await fetchAllJobPosts();
 
   return res.data;
 };

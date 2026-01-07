@@ -136,7 +136,7 @@ const PostJob = () => {
     postAJob(payload)
       .then(() => {
         toast.success("Job created successfully!");
-        navigate("/company/manage-jobs");
+        navigate("/companyDashboard/manage-jobs");
       })
       .catch((err) => {
         toast.error(err.message);

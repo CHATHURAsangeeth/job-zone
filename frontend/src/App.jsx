@@ -13,6 +13,8 @@ import { ToastContainer } from "react-toastify";
 import StudentProfile from "./pages/student/Profile.jsx";
 import ManageJobs from "./pages/company/ManageJobs.jsx";
 import PostOrUpdateJob from "./pages/company/PostOrUpdateJob.jsx";
+import FindJobs from "./pages/student/dashboard.jsx";
+import JobDetails from "./pages/student/JobDetails.jsx";
 
 
 export default function App() {
@@ -31,6 +33,8 @@ export default function App() {
           <Route path="/companyDashboard/:id/update-jobs" element={<PostOrUpdateJob />} />
 
           // student routes
+          <Route path="/jobs" element={<FindJobs />} />
+          <Route path="/jobs/:id" element={<JobDetails />} />
           <Route path="/profile" element={<StudentProfile />} />
         </Routes>
       </section>
