@@ -172,7 +172,9 @@ export default function ManageJobs() {
                                 toast.error(error.message);
                               } finally {
                                 setLoadingJobs(null);
-                                window.location.reload();
+                                setTimeout(() => {
+                                  window.location.reload();
+                                }, 3000);
                               }
                             }}
                             className="text-red-600 hover:text-red-800 transition"
@@ -200,7 +202,9 @@ export default function ManageJobs() {
                                 toast.error(error.message);
                               } finally {
                                 setLoadingJobs(null);
-                                window.location.reload();
+                                setTimeout(() => {
+                                  window.location.reload();
+                                }, 3000);
                               }
                             }}
                             className="text-blue-600 hover:text-blue-800 transition"
@@ -225,7 +229,9 @@ export default function ManageJobs() {
                               toast.error(error.message);
                             } finally {
                               setLoadingJobs(null);
-                              window.location.reload();
+                              setTimeout(() => {
+                                window.location.reload();
+                              }, 5000);
                             }
                           }}
                           className="text-gray-600 hover:text-gray-800 transition"
