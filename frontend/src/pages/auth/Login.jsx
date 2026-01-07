@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { loginUser } from "../../services/api.service";
 import { toast } from "react-toastify";
+import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -9,6 +11,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [role, setRole] = useState("student");
+  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -42,6 +45,7 @@ export default function Login() {
       );
 
       toast.success(`Signed in as ${data?.data?.user.name} `);
+      navigate("/");
     } catch (err) {
       toast.error(`Login failed: ${err.message}`, {
         className: "bg-red-600 text-white",
@@ -243,12 +247,12 @@ export default function Login() {
             {/* Footer link */}
             <p className="text-center text-sm text-gray-500">
               Don’t have an account?{" "}
-              <a
-                href="#"
+              <Link
+                to="/register"
                 className="font-medium text-blue-600 hover:text-blue-700"
               >
                 Create one here
-              </a>
+              </Link>
             </p>
           </form>
         </div>

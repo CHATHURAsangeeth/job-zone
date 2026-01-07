@@ -81,6 +81,28 @@ export async function registerUser({
   }
 }
 
+export async function fetchLoggedInProfile() {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await fetch(`${VITE_API_BASE_URL}/api/users/profile`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+
+    return data;
+  } catch (err) {
+    throw err;
+  }
+}
+
 export async function fetchJobPostsByCompanyId() {
   // eslint-disable-next-line no-useless-catch
   try {
@@ -107,6 +129,31 @@ export async function fetchApplicationsByCompanyId() {
   try {
     const response = await fetch(
       `${VITE_API_BASE_URL}/api/applications/company`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+
+    if (!response.ok) {
+      throw new Error(response.statusText);
+    }
+    const data = await response.json();
+    toast.success(data.message);
+    return data;
+  } catch (err) {
+    toast.error(err.message);
+    throw err;
+  }
+}
+export async function fetchApplicationsByLoggedStudent() {
+  // eslint-disable-next-line no-useless-catch
+  try {
+    const response = await fetch(
+      `${VITE_API_BASE_URL}/api/applications/student`,
       {
         method: "GET",
         headers: {

@@ -27,6 +27,32 @@ export const companyApplications = async (req, res, next) => {
     next(error);
   }
 };
+export const studentApplications = async (req, res, next) => {
+  try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({
+        success: false,
+        message: "Unauthorized",
+      });
+    }
+
+    const student_id = req.user.id;
+
+    const applications = await Application.find({ student_id }).sort({
+      createdAt: -1,
+    });
+
+    return res.status(200).json({
+      success: true,
+      message: "Applications fetched successfully",
+      count: applications.length,
+      data: applications,
+    });
+  } catch (error) {
+    res.status(500).json({ title: "Server Error", message: error.message });
+    next(error);
+  }
+};
 
 // updateApplication
 export const updateApplicationByCompany = async (req, res, next) => {

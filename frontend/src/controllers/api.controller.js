@@ -1,7 +1,9 @@
 import {
   fetchAllJobPosts,
   fetchApplicationsByCompanyId,
+  fetchApplicationsByLoggedStudent,
   fetchJobPostsByCompanyId,
+  fetchLoggedInProfile,
   updateAJobStatus,
   updateApplicationStatusByCompany,
 } from "../services/api.service";
@@ -10,15 +12,21 @@ export const fetchJobs = async () => {
   const res = await fetchJobPostsByCompanyId();
   return res.data;
 };
+export const fetchLoggedUser = async () => {
+  const res = await fetchLoggedInProfile();
+  return res.data;
+};
 
 export const fetchApplications = async () => {
   const res = await fetchApplicationsByCompanyId();
-
+  return res.data;
+};
+export const fetchStudentApplications = async () => {
+  const res = await fetchApplicationsByLoggedStudent();
   return res.data;
 };
 export const fetchAllJobs = async () => {
   const res = await fetchAllJobPosts();
-
   return res.data;
 };
 

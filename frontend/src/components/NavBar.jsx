@@ -5,16 +5,14 @@ import { isUserLoggedIn, loggedUserData } from "../services/auth.service";
 import { Link, useNavigate } from "react-router-dom";
 
 const navigation = [
-  { name: "Service", href: "#" },
-  { name: "Contact", href: "#" },
-  { name: "About", href: "#" },
-  { name: "Company", href: "#" },
+  { name: "Post a Job", href: "/companyDashboard/post-job" },
+  { name: "Post Manage", href: "/companyDashboard/manage-jobs" },
+  { name: "Applications", href: "/companyDashboard/applications" },
 ];
 
 export const NavBar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   let isLogginUser = isUserLoggedIn();
-  console.log("is user logged in", isLogginUser);
   const navigate = useNavigate();
   const { user } = isLogginUser ? loggedUserData() : { user: null };
 
@@ -46,15 +44,16 @@ export const NavBar = () => {
             </button>
           </div>
           <div className="hidden lg:flex lg:gap-x-12">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-xl font-semibold text-gray-900"
-              >
-                {item.name}
-              </a>
-            ))}
+            {user?.role === "company" &&
+              navigation.map((item) => (
+                <Link
+                  key={item.name}
+                  to={item.href}
+                  className="text-xl font-semibold text-gray-900"
+                >
+                  {item.name}
+                </Link>
+              ))}
           </div>
           {!isLogginUser ? (
             <div className="hidden lg:flex lg:flex-1 lg:justify-end gap-1">
@@ -84,7 +83,7 @@ export const NavBar = () => {
                 Log Out
               </Button>
               <Link
-                to={user.role === "company" ? "/companyDashboard" : "/profile"}
+                to={user?.role === "company" ? "/companyDashboard" : "/profile"}
                 className="border rounded-md px-3 py-1 bg-gradient-to-r from-blue-500 via-purple-500 to-fuchsia-500 text-white text-xl font-semibold hover:text-black"
               >
                 Profile
@@ -159,7 +158,7 @@ export const NavBar = () => {
                     </Button>
                     <Link
                       to={
-                        user.role === "company"
+                        user?.role === "company"
                           ? "/companyDashboard"
                           : "/profile"
                       }

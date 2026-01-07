@@ -12,6 +12,7 @@ import cookieParser from "cookie-parser";
 import { authorize } from "./middleware.js/auth.middleware.js";
 import cors from "cors";
 import { getAllJobs } from "./controllers/job.controller.js";
+import studentRouter from "./routes/student.route.js";
 
 const app = express();
 app.use(
@@ -26,6 +27,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use("/api/auth", authRouter);
+app.use("/api/users",authorize, studentRouter);
 app.use("/api/jobs", authorize, jobRouter);
 app.use("/api/allJobs", getAllJobs);
 app.use("/api/applications", authorize, applicationRouter);

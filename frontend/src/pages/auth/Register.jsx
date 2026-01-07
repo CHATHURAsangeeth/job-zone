@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { registerUser } from "../../services/api.service";
 import { toast } from "react-toastify";
+import { useNavigate } from "react-router-dom";
 
 export default function RegisterCard() {
   const [role, setRole] = useState("student"); // top toggle
@@ -14,6 +15,7 @@ export default function RegisterCard() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(true);
+  const navigate = useNavigate();
 
   const onSubmit = async (e) => {
     e.preventDefault();
@@ -56,6 +58,7 @@ export default function RegisterCard() {
         );
 
         toast.success(`Student account created for ${fullName}.`);
+        navigate("/")
       } else if (role === "company") {
         data = await registerUser({
           role,
@@ -71,6 +74,7 @@ export default function RegisterCard() {
         localStorage.setItem("token", data?.data?.token);
         localStorage.setItem("user", data?.data?.user);
         toast.success(`Company account created for ${fullName}.`);
+        navigate("/")
       }
     } catch {
       toast.error(`Registration failed.`, {

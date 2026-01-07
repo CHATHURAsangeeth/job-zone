@@ -27,7 +27,16 @@ export const postJob = async (req, res, next) => {
   const session = await mongoose.startSession();
 
   try {
-    const { title, jobCategory,description, location, pay, hours, deadline ,qualifications} = req.body;
+    const {
+      title,
+      jobCategory,
+      description,
+      location,
+      pay,
+      hours,
+      deadline,
+      qualifications,
+    } = req.body;
 
     // Validation
     if (!title || !description || !location || !pay || !hours || !deadline) {
@@ -156,9 +165,99 @@ export const getJobById = async (req, res, next) => {
   }
 };
 
+// export const applyJob = async (req, res, next) => {
+//   const session = await mongoose.startSession();
+//   try {
+//     if (!req.user || !req.user.id) {
+//       return res.status(401).json({
+//         success: false,
+//         message: "Unauthorized",
+//       });
+//     }
+
+//     if (req.user.role !== "student") {
+//       return res.status(403).json({
+//         success: false,
+//         message: "Only students can apply for jobs",
+//       });
+//     }
+//     const { jobId } = req.params;
+//     const studentId = req.user.id;
+//     const studentName = req.user.name;
+//     const studentEmail = req.user.email;
+//     const studentResume = req.user.resume_url;
+
+//     const job = await Job.findById(jobId);
+//     if (!job) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Job not found",
+//       });
+//     }
+//     const company_id = job.company_id;
+//     const company_name = job.name;
+//     const job_title = job.title;
+//     if (company_id === studentId) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "You cannot apply for your own job",
+//       });
+//     }
+
+//     const alredyApplied = await Application.findOne({
+//       student_id: studentId,
+//       job_id: jobId,
+//     });
+//     if (alredyApplied) {
+//       return res.status(400).json({
+//         success: false,
+//         message: "You have already applied for this job",
+//       });
+//     }
+//     session.startTransaction();
+//     const application = await Application.create({
+//       student_id: studentId,
+//       company_id: company_id,
+//       company_name: company_name,
+//       job_location:job.location ,
+//       job_type: job.hours,
+//       job_id: jobId,
+//       student_name: studentName,
+//       student_email: studentEmail,
+//       resume_url: studentResume,
+//       job_title,
+//       status: "Pending",
+//     });
+
+//     await Job.findByIdAndUpdate(
+//       jobId,
+//       { $inc: { applicationsCount: 1 } },
+//       { new: true }
+//     );
+
+//     await session.commitTransaction();
+//     await session.endSession();
+
+//     return res.status(201).json({
+//       success: true,
+//       message: "Application submitted successfully",
+//       data: application,
+//     });
+//   } catch (error) {
+//     next(error);
+//     console.error("Apply job error:", error);
+//     return res.status(500).json({
+//       success: false,
+//       message: "Server error",
+//       error: error.message,
+//     });
+//   }
+// };
 export const applyJob = async (req, res, next) => {
   const session = await mongoose.startSession();
+
   try {
+    // 1️⃣ Auth check
     if (!req.user || !req.user.id) {
       return res.status(401).json({
         success: false,
@@ -172,72 +271,94 @@ export const applyJob = async (req, res, next) => {
         message: "Only students can apply for jobs",
       });
     }
+
     const { jobId } = req.params;
     const studentId = req.user.id;
-    const studentName = req.user.name;
-    const studentEmail = req.user.email;
-    const studentResume = req.user.resume_url;
 
-    const job = await Job.findById(jobId);
+    // 2️⃣ Get job + company (populate)
+    const job = await Job.findById(jobId)
+      .populate("company_id", "name")
+      .session(session);
+
     if (!job) {
       return res.status(404).json({
         success: false,
         message: "Job not found",
       });
     }
-    const company_id = job.company_id;
-    const job_title = job.title;
-    if (company_id === studentId) {
+
+    // 3️⃣ Prevent self-application
+    if (job.company_id._id.toString() === studentId) {
       return res.status(400).json({
         success: false,
         message: "You cannot apply for your own job",
       });
     }
 
-    const alredyApplied = await Application.findOne({
+    // 4️⃣ Prevent duplicate applications
+    const alreadyApplied = await Application.findOne({
       student_id: studentId,
       job_id: jobId,
     });
-    if (alredyApplied) {
+
+    if (alreadyApplied) {
       return res.status(400).json({
         success: false,
         message: "You have already applied for this job",
       });
     }
-    session.startTransaction();
-    const application = await Application.create({
-      student_id: studentId,
-      company_id: company_id,
-      job_id: jobId,
-      student_name: studentName,
-      student_email: studentEmail,
-      resume_url: studentResume,
-      job_title,
-      status: "Pending",
-    });
 
+    // 5️⃣ Start transaction
+    session.startTransaction();
+
+    // 6️⃣ Create application (ONLY required fields)
+    const application = await Application.create(
+      [
+        {
+          student_id: studentId,
+          company_id: job.company_id._id,
+          job_id: job._id,
+
+          company_name: job.company_id.name,
+          student_name: req.user.name,
+          student_email: req.user.email,
+          resume_url: req.user.resume_url,
+
+          job_title: job.title,
+          job_location: job.location,
+          job_type: job.hours,
+
+          status: "Pending",
+        },
+      ],
+      { session }
+    );
+
+    // 7️⃣ Update job application count
     await Job.findByIdAndUpdate(
       jobId,
       { $inc: { applicationsCount: 1 } },
-      { new: true }
+      { session }
     );
 
     await session.commitTransaction();
-    await session.endSession();
+    session.endSession();
+
+    // 8️⃣ Populate response
+    const populatedApplication = await Application.findById(application[0]._id)
+      .populate("student_id", "name email")
+      .populate("company_id", "name")
+      .populate("job_id", "title location hours");
 
     return res.status(201).json({
       success: true,
       message: "Application submitted successfully",
-      data: application,
+      data: populatedApplication,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
-    console.error("Apply job error:", error);
-    return res.status(500).json({
-      success: false,
-      message: "Server error",
-      error: error.message,
-    });
   }
 };
 

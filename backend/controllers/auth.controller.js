@@ -114,11 +114,7 @@ export const signIn = async (req, res, next) => {
       user = await Student.findOne({ email });
     }
 
-    if (!user) {
-      const error = new Error("Invalid email or User not found");
-      error.statusCode = 404;
-      throw error;
-    }
+  
 
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {

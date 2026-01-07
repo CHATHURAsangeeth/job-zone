@@ -5,6 +5,9 @@ import { Link, useNavigate } from "react-router-dom";
 import { fetchApplications, fetchJobs } from "../../controllers/api.controller";
 import LoadingSnippet from "../../components/LoadingSnippet";
 import { toast } from "react-toastify";
+import { isUserLoggedIn, loggedUserData } from "../../services/auth.service";
+let isLogginUser = isUserLoggedIn();
+const { user } = isLogginUser ? loggedUserData() : { user: null };
 
 const quickActions = [
   { id: "post", label: "Post a Job", icon: "plus" },
@@ -354,7 +357,7 @@ const CompanyDashboard = () => {
     <div className="mx-auto max-w-6xl px-4 py-6 m-16">
       {/* Page Header */}
       <div className="mb-6">
-        <p className="text-sm text-gray-500">Welcome back!</p>
+        <p className="text-sm text-gray-500"> Welcome <h2>{user?.name}</h2> </p>
         <h1 className="mt-1 text-2xl font-semibold text-gray-900">
           Here’s what’s happening with your jobs today.
         </h1>
