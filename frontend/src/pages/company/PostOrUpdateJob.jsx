@@ -17,6 +17,7 @@ const Calendar = ({ className = "w-5 h-5" }) => (
     />
   </svg>
 );
+
 const FieldLabel = ({ children, required }) => (
   <label className="mb-1 block text-sm font-medium text-gray-800">
     {children} {required && <span className="text-red-500">*</span>}
@@ -62,6 +63,8 @@ const PostOrUpdateJob = () => {
   const location = useLocation();
   const jobFromState = location.state?.job || {};
   const [errors, setErrors] = useState({});
+  const [qualificationInput, setQualificationInput] = useState("");
+
   const [form, setForm] = useState({
     jobCategory: jobFromState.jobCategory ?? "",
     title: jobFromState.title ?? "",
@@ -72,31 +75,50 @@ const PostOrUpdateJob = () => {
     deadline: jobFromState.deadline
       ? new Date(jobFromState.deadline).toISOString().split("T")[0]
       : "",
+    qualifications: jobFromState.qualifications ?? [], // <-- added qualifications
   });
+
+  console.log(form.jobCategory);
+  
 
   const setField = (key, val) => {
     setForm((prev) => ({ ...prev, [key]: val }));
     setErrors((prev) => ({ ...prev, [key]: undefined }));
   };
 
+
+  const addQualification = () => {
+    const trimmed = qualificationInput.trim();
+    if (trimmed && !form.qualifications.includes(trimmed)) {
+      setForm((prev) => ({
+        ...prev,
+        qualifications: [...prev.qualifications, trimmed],
+      }));
+      setQualificationInput("");
+    }
+  };
+
+  const removeQualification = (index) => {
+    setForm((prev) => ({
+      ...prev,
+      qualifications: prev.qualifications.filter((_, i) => i !== index),
+    }));
+  };
+
   const validate = () => {
     const e = {};
-
     if (!form.title.trim()) e.title = "Job title is required.";
     if (!form.description.trim() || form.description.trim().length < 20) {
       e.description =
         "Please provide a detailed job description (min 20 characters).";
     }
-
     const payNum = parseFloat(form.pay);
     if (form.pay && (isNaN(payNum) || payNum < 0)) {
       e.pay = "Please enter a valid positive salary amount.";
     }
-
     if (form.deadline && isNaN(Date.parse(form.deadline))) {
       e.deadline = "Please enter a valid date.";
     }
-
     setErrors(e);
     return Object.keys(e).length === 0;
   };
@@ -112,7 +134,6 @@ const PostOrUpdateJob = () => {
       deadline: form.deadline
         ? new Date(form.deadline).toISOString()
         : undefined,
-      
       status: "active",
     };
 
@@ -132,7 +153,7 @@ const PostOrUpdateJob = () => {
       <div className="mb-6">
         <p className="text-sm text-gray-500">Welcome back!</p>
         <h1 className="mt-1 text-2xl font-semibold text-gray-900">
-          Update Your job
+          Update Your Job
         </h1>
       </div>
 
@@ -141,7 +162,7 @@ const PostOrUpdateJob = () => {
         onSubmit={handleSubmit}
         className="rounded-2xl border border-gray-200 bg-white p-6 shadow-sm"
       >
-        {/* Job Name & Title */}
+        {/* Job Title & Category */}
         <div className="grid gap-5 md:grid-cols-2">
           <div>
             <FieldLabel required>Job Title</FieldLabel>
@@ -153,22 +174,17 @@ const PostOrUpdateJob = () => {
             />
             <ErrorText>{errors.title}</ErrorText>
           </div>
-          {/* jobCategory */}
-          <div className="grid gap-5 md:grid-cols-2">
-            <div>
-              <FieldLabel required>Job Category</FieldLabel>
-              <input
-                type="text"
-                value={form.jobCategory}
-                onChange={(e) => setField("jobCategory", e.target.value)}
-                placeholder="e.g. IT"
-                className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
-              />
-              <ErrorText>{errors.jobCategory}</ErrorText>
-              <p className="mt-1 text-xs text-gray-500">
-                Usually the same as Job Name
-              </p>
-            </div>
+
+          <div>
+            <FieldLabel required>Job Category</FieldLabel>
+            <input
+              type="text"
+              value={form.jobCategory}
+              onChange={(e) => setField("jobCategory", e.target.value)}
+              placeholder="e.g. IT"
+              className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
+            />
+            <ErrorText>{errors.jobCategory}</ErrorText>
           </div>
         </div>
 
@@ -184,6 +200,50 @@ const PostOrUpdateJob = () => {
           <ErrorText>{errors.description}</ErrorText>
         </div>
 
+        {/* Qualifications */}
+        <div className="mt-5">
+          <FieldLabel>Qualifications</FieldLabel>
+          <div className="flex gap-2 mb-2">
+            <input
+              type="text"
+              value={qualificationInput}
+              onChange={(e) => setQualificationInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  addQualification();
+                }
+              }}
+              placeholder="Type a qualification and press Enter"
+              className="flex-1 p-3 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <button
+              type="button"
+              onClick={addQualification}
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition"
+            >
+              Add
+            </button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {form.qualifications.map((q, index) => (
+              <span
+                key={index}
+                className="bg-gray-200 text-gray-800 px-3 py-1 rounded-full flex items-center gap-1"
+              >
+                {q}
+                <button
+                  type="button"
+                  onClick={() => removeQualification(index)}
+                  className="text-red-500 hover:text-red-700 font-bold"
+                >
+                  &times;
+                </button>
+              </span>
+            ))}
+          </div>
+        </div>
+
         {/* Location & Hours */}
         <div className="mt-5 grid gap-5 md:grid-cols-2">
           <div>
@@ -192,7 +252,7 @@ const PostOrUpdateJob = () => {
               type="text"
               value={form.location}
               onChange={(e) => setField("location", e.target.value)}
-              placeholder="e.g. Colombo ,Malabe, Kandy"
+              placeholder="e.g. Colombo, Malabe, Kandy"
               className="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-900 shadow-sm outline-none focus:border-blue-600"
             />
           </div>
@@ -256,6 +316,7 @@ const PostOrUpdateJob = () => {
                 pay: "",
                 hours: "",
                 deadline: "",
+                qualifications: [],
               })
             }
             className="rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-medium text-gray-700 shadow-sm transition hover:bg-gray-50"

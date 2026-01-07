@@ -27,7 +27,7 @@ export const postJob = async (req, res, next) => {
   const session = await mongoose.startSession();
 
   try {
-    const { title, description, location, pay, hours, deadline } = req.body;
+    const { title, jobCategory,description, location, pay, hours, deadline ,qualifications} = req.body;
 
     // Validation
     if (!title || !description || !location || !pay || !hours || !deadline) {
@@ -58,11 +58,13 @@ export const postJob = async (req, res, next) => {
       company_id: req.user.id,
       name: req.user.name,
       title,
+      jobCategory,
       description,
       location,
       pay,
       hours,
       deadline,
+      qualifications,
       status: "active",
     });
     await session.commitTransaction();
@@ -286,6 +288,7 @@ export const updateJobByCompany = async (req, res, next) => {
       "location",
       "pay",
       "hours",
+      "qualifications",
       "deadline",
       "status",
     ];

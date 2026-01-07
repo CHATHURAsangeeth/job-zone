@@ -17,6 +17,7 @@ const jobSchema = new mongoose.Schema(
     applicationsCount: { type: Number, default: 0 },
     hours: { type: String }, // e.g., "Part-time 20h/week"
     deadline: { type: Date },
+    qualifications: [String],
     status: { type: String, enum: ["active", "closed"], default: "active" },
   },
   { timestamps: true }

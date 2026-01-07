@@ -146,10 +146,12 @@ export async function postAJob(payload) {
       },
       body: JSON.stringify({
         title: payload.title,
+        jobCategory: payload.jobCategory,
         description: payload.description,
         location: payload.location,
         pay: payload.pay,
         hours: payload.hours,
+        qualifications: payload.qualifications,
         deadline: payload.deadline,
       }),
     });
@@ -188,6 +190,7 @@ export async function updateAJobPost(payload) {
           location: payload.location,
           pay: payload.pay,
           hours: payload.hours,
+          qualifications: payload.qualifications,
           deadline: payload.deadline,
         }),
       }
