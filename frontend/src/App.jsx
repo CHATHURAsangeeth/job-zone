@@ -15,7 +15,7 @@ import ManageJobs from "./pages/company/ManageJobs.jsx";
 import PostOrUpdateJob from "./pages/company/PostOrUpdateJob.jsx";
 import FindJobs from "./pages/student/dashboard.jsx";
 import JobDetails from "./pages/student/JobDetails.jsx";
-
+import ProtectedRoute from "./utils/ProtectedRoute.jsx";
 
 export default function App() {
   return (
@@ -26,16 +26,29 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
-          <Route path="/companyDashboard" element={<CompanyDashboard />} />
-          <Route path="/companyDashboard/applications" element={<Application />} />
-          <Route path="/companyDashboard/post-job" element={<PostJob />} />
-          <Route path="/companyDashboard/manage-jobs" element={<ManageJobs />} />
-          <Route path="/companyDashboard/:id/update-jobs" element={<PostOrUpdateJob />} />
-
-          // student routes
           <Route path="/jobs" element={<FindJobs />} />
-          <Route path="/jobs/:id" element={<JobDetails />} />
-          <Route path="/profile" element={<StudentProfile />} />
+          // company routes
+          <Route element={<ProtectedRoute role="company" />}>
+            <Route path="/companyDashboard" element={<CompanyDashboard />} />
+            <Route
+              path="/companyDashboard/applications"
+              element={<Application />}
+            />
+            <Route path="/companyDashboard/post-job" element={<PostJob />} />
+            <Route
+              path="/companyDashboard/manage-jobs"
+              element={<ManageJobs />}
+            />
+            <Route
+              path="/companyDashboard/:id/update-jobs"
+              element={<PostOrUpdateJob />}
+            />
+          </Route>
+          // student routes
+          <Route element={<ProtectedRoute role="student" />}>
+            <Route path="/jobs/:id" element={<JobDetails />} />
+            <Route path="/profile" element={<StudentProfile />} />
+          </Route>
         </Routes>
       </section>
 
